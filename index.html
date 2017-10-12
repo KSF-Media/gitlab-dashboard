@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Gitlab Pipelines TV Dashboard</title>
+
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="node_modules/font-awesome/css/font-awesome.min.css">
+  </head>
+
+  <body>
+    <style>
+    body {
+       padding-top: 3.5rem;
+     }
+     .app {
+       padding: 1.5rem;
+       text-align: center;
+     }
+
+    </style>
+
+    <nav class="navbar navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="#">Gitlab Pipelines</a>
+    </nav>
+
+    <div class="app">
+      <table class="table table-inverse">
+        <thead>
+          <tr>
+            <th>ID, Status</th>
+            <th>Repo</th>
+            <th>Commit</th>
+            <th>Stages</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="pipelines"></tbody>
+      </table>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/popper.js/dist/umd/popper.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="node_modules/moment/min/moment.min.js"></script>
+  </body>
+</html>
