@@ -59,7 +59,20 @@ function format_pipeline(pipeline) {
 
 
 /// Data-transformation from Gitlab format to our format
+function get_unique_stages (pipeline_jobs) {
+  let asc_by_id = (ja, jb) => ja.id - jb.id;
+  let stages_map = group_by(pipeline_jobs, stage => stage.name);
+  return Array
+    .from(stages_map.values())
+    .map(stages => stages
+         .sort(asc_by_id)
+         .slice(-1)[0])  // Take last job here
+    .sort(asc_by_id)
+    .map(job => job.status);
+}
+
 function processJobs() {
+  pipelines = [];
   var currentPipelines = group_by(jobs, j => j.pipeline.id);
   for (var [id, p] of currentPipelines.entries()) {
     started  = new Date(Math.min.apply(null, p.map(job => new Date(job.started_at))));
@@ -72,9 +85,7 @@ function processJobs() {
       "status": p[0].pipeline.status,
       "id": p[0].pipeline.id,
       "repo": p[0].project,
-      "stages": p
-        .sort((ja, jb) => ja.id - jb.id)
-        .map(job => job.status),
+      "stages": get_unique_stages(p),
       "running_time": format_time(Math.round(Math.abs(finished - started)))
     });
     // Add rows to page
@@ -126,7 +137,6 @@ function fetch_projects(gitlab_url, token) {
   // Refresh projects every 30 secs
   console.log("Refreshing pipelines...");
   jobs = [];
-  pipelines = [];
   get_projects(gitlab_url, token, projects => process_projects(gitlab_url, token, projects));
   setTimeout(() => fetch_projects(gitlab_url, token), 30000);
 }
