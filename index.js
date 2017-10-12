@@ -51,7 +51,7 @@ function format_pipeline(pipeline) {
     pipeline.repo,
     pipeline.ref + ", " + pipeline.commit + " " + author_img(pipeline.author_img),
     pipeline.stages,
-    pipeline.created + ", " + pipeline.running_time
+    moment(pipeline.created).fromNow() + ", " + pipeline.running_time
   ];
 
   return wrap_row(cells.map(wrap_cell));
@@ -65,8 +65,10 @@ function get_unique_stages (pipeline_jobs) {
   return Array
     .from(stages_map.values())
     .map(stages => stages
+         .slice()
          .sort(asc_by_id)
          .slice(-1)[0])  // Take last job here
+    .slice()
     .sort(asc_by_id)
     .map(job => job.status);
 }
@@ -81,18 +83,20 @@ function processJobs() {
       "author_img": p[0].user.avatar_url,
       "commit": p[0].commit.title,
       "ref": p[0].ref,
-      "created": moment(p[0].created_at).fromNow(),
+      "created": p[0].created_at,
       "status": p[0].pipeline.status,
       "id": p[0].pipeline.id,
       "repo": p[0].project,
       "stages": get_unique_stages(p),
       "running_time": format_time(Math.round(Math.abs(finished - started)))
     });
-    // Add rows to page
-    $("#pipelines")
-      .empty()
-      .append(pipelines.slice(0, 50).map(format_pipeline));
   }
+  // Order pipelines by date, desc
+  pipelines.sort((a, b) => new Date(b.created) - new Date(a.created));
+  // Add rows to page
+  $("#pipelines")
+    .empty()
+    .append(pipelines.slice(0, 50).map(format_pipeline));
 }
 
 
