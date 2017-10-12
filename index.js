@@ -34,6 +34,16 @@ row_colors = {
   "skipped":  "bg-none" // bogus color
 };
 
+status_icons = {
+  "created":  "dot-circle-o",
+  "manual" :  "user-circle-o",
+  "running":  "refresh",
+  "pending":  "question-circle-o",
+  "success":  "check-circle-o",
+  "failed":   "times-circle-o",
+  "canceled": "stop-circle-o",
+  "skipped":  "arrow-circle-o-right"
+};
 
 /// HTML business
 function wrap_cell(val) {
@@ -44,13 +54,21 @@ function author_img(url) {
   return '<img src="' + url + '" height="20" width="20">';
 }
 
+function status2icon(status) {
+  if (status === "running") {
+    return '<span class="fa-stack"><i class="fa fa-circle-o fa-stack-2x"></i><i class="fa fa-stack-1x fa-inverse fa-' + status_icons[status] +'"></i></span>'; 
+  } else {
+    return '<i style="vertical-align:middle;" class="fa fa-2x fa-' + status_icons[status] +'"></i>';
+  }
+}
+
 function format_pipeline(pipeline) {
   var wrap_row = val => "<tr class='" + row_colors[pipeline.status] + "'>" + val + "</tr>";
   var cells = [
     "#" + pipeline.id + ": " + pipeline.status,
     pipeline.repo,
     pipeline.ref + ", " + pipeline.commit + " " + author_img(pipeline.author_img),
-    pipeline.stages,
+    pipeline.stages.map(status2icon).join(" "),
     moment(pipeline.created).fromNow() + ", " + pipeline.running_time
   ];
 
