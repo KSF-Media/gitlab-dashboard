@@ -15,12 +15,19 @@
 
   <body>
     <style>
-    body {
+     body {
        padding-top: 3.5rem;
      }
-     .app {
+     .app table {
        padding: 1.5rem;
        text-align: center;
+     }
+
+    .truncate {
+       width: 400px;
+       white-space: nowrap;
+       overflow: hidden;
+       text-overflow: ellipsis;
      }
 
     </style>
@@ -33,7 +40,7 @@
       <table class="table table-inverse">
         <thead>
           <tr>
-            <th>ID, Status</th>
+            <th>Status</th>
             <th>Repo</th>
             <th>Commit</th>
             <th>Stages</th>

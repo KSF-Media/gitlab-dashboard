@@ -47,7 +47,7 @@ status_icons = {
 
 /// HTML business
 function wrap_cell(val) {
-  return "<td>" + val + "</td>";
+  return "<td style='white-space:nowrap; text-align: left;'>" + val + "</td>";
 }
 
 function author_img(url) {
@@ -67,7 +67,7 @@ function format_pipeline(pipeline) {
   var cells = [
     "#" + pipeline.id + ": " + pipeline.status,
     pipeline.repo,
-    pipeline.ref + ", " + pipeline.commit + " " + author_img(pipeline.author_img),
+    pipeline.ref + ", " + pipeline.hash + "<br>" + author_img(pipeline.author_img) + " <div class='truncate'>" + pipeline.commit + "</div>",
     pipeline.stages.map(status2icon).join(" "),
     moment(pipeline.created).fromNow() + ", " + pipeline.running_time
   ];
@@ -100,6 +100,7 @@ function processJobs() {
     pipelines.push({
       "author_img": p[0].user.avatar_url,
       "commit": p[0].commit.title,
+      "hash": p[0].commit.short_id,
       "ref": p[0].ref,
       "created": p[0].created_at,
       "status": p[0].pipeline.status,
