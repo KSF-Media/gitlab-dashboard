@@ -15,6 +15,11 @@ function group_by(list, keyGetter) {
   return map;
 }
 
+// Credit: https://stackoverflow.com/questions/1026069
+String.prototype.capitalize = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
 function format_time(milliseconds) {
   // Formats time in hh:mm:ss format
   return moment("2015-01-01")
@@ -51,25 +56,46 @@ function wrap_cell(val) {
 }
 
 function author_img(url) {
-  return '<img src="' + url + '" height="20" width="20">';
+  return '<img src="' + url + '" height="20" width="20" style="border-radius:20px">';
+}
+
+function fa_icon(name, additional_classes) {
+  return '<i style="margin:0 3px;" class="fa fa-' + name + ' ' + additional_classes + '"></i>';
 }
 
 function status2icon(status) {
   if (status === "running") {
     return '<span class="fa-stack"><i class="fa fa-circle-o fa-stack-2x"></i><i class="fa fa-stack-1x fa-inverse fa-' + status_icons[status] +'"></i></span>'; 
   } else {
-    return '<i style="vertical-align:middle;" class="fa fa-2x fa-' + status_icons[status] +'"></i>';
+    return fa_icon(status_icons[status], "fa-2x align-middle");
   }
 }
 
+function format_status(id, status) {
+  let content = "#" + id + "<br>" + status.capitalize();
+  return "<div style='padding-left: 2em'>" + content + "</div>";
+}
+
+function format_commit(branch, hash, img, message) {
+  let span = "<span style='margin-left:1em'></span>";
+  let line1 = [img, span, fa_icon("code-fork"), "<b>" + branch + "</b>", span, fa_icon("code"), hash].join(" ");
+  let line2 = "<div class='truncate'>" + message + "</div>";
+  return line1 + "<br>" + line2;
+}
+
+function format_times(when, running_time) {
+  let content = [fa_icon("clock-o"), running_time, "<br>", fa_icon("calendar"), when].join(" ");
+  return "<div style='text-align:right; padding-right: 2em;'>" + content + "</div>";
+}
+
 function format_pipeline(pipeline) {
-  var wrap_row = val => "<tr class='" + row_colors[pipeline.status] + "'>" + val + "</tr>";
-  var cells = [
-    "#" + pipeline.id + ": " + pipeline.status,
-    pipeline.repo,
-    pipeline.ref + ", " + pipeline.hash + "<br>" + author_img(pipeline.author_img) + " <div class='truncate'>" + pipeline.commit + "</div>",
-    pipeline.stages.map(status2icon).join(" "),
-    moment(pipeline.created).fromNow() + ", " + pipeline.running_time
+  let wrap_row = val => "<tr class='" + row_colors[pipeline.status] + "'>" + val + "</tr>";
+  let cells = [
+    format_status(pipeline.id, pipeline.status),
+    "<b>" + pipeline.repo + "</b>",
+    format_commit(pipeline.ref, pipeline.hash, author_img(pipeline.author_img), pipeline.commit),
+    pipeline.stages.map(status2icon).join(""),
+    format_times(moment(pipeline.created).fromNow(), pipeline.running_time)
   ];
 
   return wrap_row(cells.map(wrap_cell));
