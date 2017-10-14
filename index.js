@@ -118,7 +118,7 @@ function get_unique_stages (pipeline_jobs) {
 }
 
 function processJobs() {
-  pipelines = [];
+  var pipelines = [];
   var currentPipelines = group_by(jobs, j => j.pipeline.id);
   for (var [id, p] of currentPipelines.entries()) {
     started  = new Date(Math.min.apply(null, p.map(job => new Date(job.started_at))));
@@ -137,11 +137,11 @@ function processJobs() {
     });
   }
   // Order pipelines by date, desc
-  pipelines.sort((a, b) => new Date(b.created) - new Date(a.created));
+  pipelines = pipelines.slice().sort((a, b) => new Date(b.created) - new Date(a.created));
   // Add rows to page
   $("#pipelines")
     .empty()
-    .append(pipelines.slice(0, 50).map(format_pipeline));
+    .append(pipelines.slice(0, 30).map(format_pipeline));
 }
 
 
