@@ -1,1 +1,4 @@
 node_modules
+output
+.psc-package
+index.js
