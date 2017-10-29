@@ -4,7 +4,8 @@
   "description": "TV dashboard for a global view on Gitlab Pipelines",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install": "psc-package update && pulp --psc-package build --to app.js",
+    "start": "pulp --psc-package server"
   },
   "license": "MIT",
   "repository": "https://github.com/KSF-Media/gitlab-dashboard",
