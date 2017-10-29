@@ -3,6 +3,8 @@
     "set": "aff-4.0-27-Oct-2017",
     "source": "https://github.com/justinwoo/package-sets.git",
     "depends": [
+        "dom",
+        "argonaut-core",
         "aff",
         "halogen",
         "prelude",
