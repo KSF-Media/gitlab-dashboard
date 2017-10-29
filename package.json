@@ -4,7 +4,7 @@
   "description": "TV dashboard for a global view on Gitlab Pipelines",
   "main": "index.js",
   "scripts": {
-    "install": "psc-package update && pulp --psc-package build --to index.js",
+    "install": "psc-package update && pulp --psc-package build --to app.js",
     "start": "pulp --psc-package server"
   },
   "license": "MIT",
