@@ -5,10 +5,11 @@ import Prelude
 import Control.Monad.Aff (Fiber, launchAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE, log, logShow)
+import Control.Monad.Eff.Console (CONSOLE, log)
 import DOM (DOM)
 import Gitlab (getProjects)
 import Network.HTTP.Affjax (AJAX)
+import Simple.JSON (writeJSON)
 import URLSearchParams as URLParams
 
 type Main = forall e.
@@ -29,4 +30,4 @@ main = do
   log (baseUrl <> " " <> token)
   launchAff $ do
     projects <- getProjects baseUrl token
-    liftEff $ logShow projects
+    liftEff $ log $ writeJSON projects
