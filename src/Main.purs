@@ -7,7 +7,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, log)
 import DOM (DOM)
-import Gitlab (getProjects)
+import Gitlab (getProjects, getJobs)
 import Network.HTTP.Affjax (AJAX)
 import Simple.JSON (writeJSON)
 import URLSearchParams as URLParams
@@ -31,3 +31,6 @@ main = do
   launchAff $ do
     projects <- getProjects baseUrl token
     liftEff $ log $ writeJSON projects
+    let proj = {name: "faro", id: 64} -- example project with pipelines
+    jobs <- getJobs baseUrl token proj
+    liftEff $ log $ writeJSON jobs
