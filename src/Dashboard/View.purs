@@ -7,3 +7,12 @@ import Halogen.HTML.Properties as P
 import Halogen.HTML.CSS (style) as P
 import CSS as CSS
 import CSS (px)
+
+cell :: ∀ p i. HTML p i -> HTML p i
+cell content =
+  H.td
+    [ P.style do
+        CSS.textWhitespace CSS.whitespaceNoWrap
+    ]
+    [ content ]
+
