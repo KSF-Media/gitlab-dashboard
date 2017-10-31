@@ -36,6 +36,7 @@ type Job =
   , commit      :: Commit
   , ref         :: String
   , pipeline    :: Pipeline
+  , status      :: String -- TODO: make enum
   , created_at  :: String
   , started_at  :: Maybe String
   , finished_at :: Maybe String
