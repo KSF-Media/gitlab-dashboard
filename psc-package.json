@@ -3,6 +3,8 @@
     "set": "aff-4.0-27-Oct-2017",
     "source": "https://github.com/justinwoo/package-sets.git",
     "depends": [
+        "debug",
+        "foreign",
         "simple-json",
         "affjax",
         "strings",
