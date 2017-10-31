@@ -16,3 +16,12 @@ cell content =
     ]
     [ content ]
 
+authorImage :: ∀ p i. String -> HTML p i
+authorImage url =
+  H.img
+    [ P.height 20
+    , P.width 20
+    , P.style do
+        CSS.borderRadius (20.0 # px) (20.0 # px) (20.0 # px) (20.0 # px)
+    ]
+
