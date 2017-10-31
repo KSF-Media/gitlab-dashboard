@@ -25,3 +25,10 @@ authorImage url =
         CSS.borderRadius (20.0 # px) (20.0 # px) (20.0 # px) (20.0 # px)
     ]
 
+fontAwesome :: ∀ p i. String -> Array ClassName -> HTML p i
+fontAwesome name moreClasses =
+  H.i
+    [ P.classes (classes <> moreClasses) ]
+    [ ]
+  where
+    classes = ClassName <$> [ "fa", "fa-" <> name ]
