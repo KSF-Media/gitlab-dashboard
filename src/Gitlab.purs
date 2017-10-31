@@ -5,10 +5,9 @@ import Prelude
 import Control.Monad.Aff (Aff)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Debug.Trace as Debug
 import Network.HTTP.Affjax (AJAX, get)
 import Simple.JSON (class ReadForeign, class WriteForeign, readJSON)
-
-import Debug.Trace as Debug
 
 type BaseUrl = String
 type Token = String
@@ -59,7 +58,6 @@ getProjects baseUrl token = do
         Right projects -> projects
   pure ps
 
-
 getJobs :: forall a. BaseUrl -> Token -> Project -> Aff (ajax :: AJAX | a) Jobs
 getJobs baseUrl token project = do
   let url = baseUrl
@@ -73,5 +71,8 @@ getJobs baseUrl token project = do
         Left e -> do
           let _ = Debug.spy $ show e
           []
-        Right jobs -> jobs
+        Right jobs -> map (setProject project) jobs
   pure js
+    where
+      setProject :: Project -> Job -> Job
+      setProject p j = j {project = Just p}
