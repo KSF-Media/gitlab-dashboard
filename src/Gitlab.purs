@@ -2,10 +2,11 @@ module Gitlab where
 
 import Prelude
 
-import Control.Monad.Aff (Aff)
+import Control.Monad.Aff (Aff, error, throwError)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Network.HTTP.Affjax (AJAX, get)
+import Network.HTTP.StatusCode (StatusCode(..))
 import Simple.JSON (readJSON)
 
 newtype BaseUrl = BaseUrl String
@@ -53,10 +54,12 @@ getProjects (BaseUrl baseUrl) (Token token) = do
             <> token
             <> "&simple=true&per_page=20&order_by=last_activity_at"
   projectsRes <- get url
-  let ps = case readJSON projectsRes.response of
-        Left e -> []
-        Right projects -> projects
-  pure ps
+  when (projectsRes.status /= (StatusCode 200)) do
+    throwError $ error "Failed to fetch projects"
+  case readJSON projectsRes.response of
+    Left e -> do
+      throwError $ error ("Failed to parse projects: " <> show e)
+    Right projects -> pure projects
 
 getJobs :: forall a. BaseUrl -> Token -> Project -> Aff (ajax :: AJAX | a) Jobs
 getJobs (BaseUrl baseUrl) (Token token) project = do
@@ -67,10 +70,12 @@ getJobs (BaseUrl baseUrl) (Token token) project = do
             <> token
             <> "&per_page=100"
   jobsRes <- get url
-  let js = case readJSON jobsRes.response of
-        Left e -> []
-        Right jobs -> map (setProject project) jobs
-  pure js
+  when (jobsRes.status /= (StatusCode 200)) do
+    throwError $ error "Failed to fetch jobs"
+  case readJSON jobsRes.response of
+    Left e -> do
+      throwError $ error ("Failed to parse jobs: " <> show e)
+    Right jobs -> pure $ map (setProject project) jobs
     where
       setProject :: Project -> Job -> Job
       setProject p j = j {project = Just p}
