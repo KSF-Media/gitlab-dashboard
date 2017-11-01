@@ -3,6 +3,12 @@
     "set": "aff-4.0-27-Oct-2017",
     "source": "https://github.com/justinwoo/package-sets.git",
     "depends": [
+        "transformers",
+        "debug",
+        "foreign",
+        "simple-json",
+        "affjax",
+        "strings",
         "dom",
         "argonaut-core",
         "aff",
