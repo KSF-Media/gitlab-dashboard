@@ -8,8 +8,8 @@ import Data.Maybe (Maybe(..))
 import Network.HTTP.Affjax (AJAX, get)
 import Simple.JSON (readJSON)
 
-type BaseUrl = String
-type Token = String
+newtype BaseUrl = BaseUrl String
+newtype Token = Token String
 
 type Project =
   { id   :: Int
@@ -47,7 +47,7 @@ type Jobs = Array Job
 
 
 getProjects :: forall a. BaseUrl -> Token -> Aff (ajax :: AJAX | a) Projects
-getProjects baseUrl token = do
+getProjects (BaseUrl baseUrl) (Token token) = do
   let url = baseUrl
             <> "/api/v4/projects?private_token="
             <> token
@@ -59,7 +59,7 @@ getProjects baseUrl token = do
   pure ps
 
 getJobs :: forall a. BaseUrl -> Token -> Project -> Aff (ajax :: AJAX | a) Jobs
-getJobs baseUrl token project = do
+getJobs (BaseUrl baseUrl) (Token token) project = do
   let url = baseUrl
             <> "/api/v4/projects/"
             <> show project.id
