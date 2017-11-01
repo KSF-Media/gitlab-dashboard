@@ -3,9 +3,8 @@ module Main where
 import Prelude
 
 import Control.Monad.Aff (Fiber, launchAff)
+import Control.Monad.Aff.Console (CONSOLE, log)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE, log)
 import DOM (DOM)
 import Gitlab (getProjects, getJobs)
 import Network.HTTP.Affjax (AJAX)
@@ -27,10 +26,10 @@ main :: Main
 main = do
   token   <- URLParams.get "private_token"
   baseUrl <- URLParams.get "gitlab_url"
-  log (baseUrl <> " " <> token)
   launchAff $ do
+    log (baseUrl <> " " <> token)
     projects <- getProjects baseUrl token
-    liftEff $ log $ writeJSON projects
+    log $ writeJSON projects
     let proj = {name: "faro", id: 64} -- example project with pipelines
     jobs <- getJobs baseUrl token proj
-    liftEff $ log $ writeJSON jobs
+    log $ writeJSON jobs
