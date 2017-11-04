@@ -31,6 +31,10 @@ newtype PipelineId = PipelineId Int
 derive newtype instance readforeignPipelineId :: ReadForeign PipelineId
 derive newtype instance writeforeignPipelineId :: WriteForeign PipelineId
 
+newtype JobId = JobId Int
+derive newtype instance readforeignJobId :: ReadForeign JobId
+derive newtype instance writeforeignJobId :: WriteForeign JobId
+
 newtype BranchName = BranchName String
 derive newtype instance readforeignBranchName :: ReadForeign BranchName
 derive newtype instance writeforeignBranchName :: WriteForeign BranchName
@@ -66,6 +70,7 @@ type Job =
   , ref         :: BranchName
   , pipeline    :: Pipeline
   , status      :: JobStatus
+  , id          :: JobId
   , created_at  :: ISODateString
   , started_at  :: Maybe ISODateString
   , finished_at :: Maybe ISODateString
