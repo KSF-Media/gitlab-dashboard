@@ -6,7 +6,7 @@ import Control.Monad.Aff (Fiber, launchAff)
 import Control.Monad.Aff.Console (CONSOLE, log)
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
-import Gitlab (getProjects, getJobs, BaseUrl(..), Token(..))
+import Gitlab (BaseUrl(..), ProjectId(..), ProjectName(..), Token(..), getJobs, getProjects)
 import Network.HTTP.Affjax (AJAX)
 import Simple.JSON (writeJSON)
 import URLSearchParams as URLParams
@@ -26,9 +26,10 @@ main :: Main
 main = do
   token   <- Token   <$> URLParams.get "private_token"
   baseUrl <- BaseUrl <$> URLParams.get "gitlab_url"
+  -- TODO: display error if parameters are not provided
   launchAff $ do
     projects <- getProjects baseUrl token
     log $ writeJSON projects
-    let proj = {name: "faro", id: 64} -- example project with pipelines
+    let proj = {name: (ProjectName "faro"), id: (ProjectId 64)} -- example project with pipelines
     jobs <- getJobs baseUrl token proj
     log $ writeJSON jobs
