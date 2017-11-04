@@ -7,14 +7,42 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Network.HTTP.Affjax (AJAX, get)
 import Network.HTTP.StatusCode (StatusCode(..))
-import Simple.JSON (readJSON)
+import Simple.JSON (class ReadForeign, class WriteForeign, readJSON, writeJSON)
 
 newtype BaseUrl = BaseUrl String
 newtype Token = Token String
 
+type PipelineStatus = String -- TODO: make enum
+type JobStatus      = String -- TODO: make enum
+
+newtype ProjectId = ProjectId Int
+derive newtype instance readforeignProjectId :: ReadForeign ProjectId
+derive newtype instance writeforeignProjectId :: WriteForeign ProjectId
+
+newtype ProjectName = ProjectName String
+derive newtype instance readforeignProjectName :: ReadForeign ProjectName
+derive newtype instance writeforeignProjectName :: WriteForeign ProjectName
+
+newtype CommitShortHash = CommitShortHash String
+derive newtype instance readforeignCommitShortHash :: ReadForeign CommitShortHash
+derive newtype instance writeforeignCommitShortHash :: WriteForeign CommitShortHash
+
+newtype PipelineId = PipelineId Int
+derive newtype instance readforeignPipelineId :: ReadForeign PipelineId
+derive newtype instance writeforeignPipelineId :: WriteForeign PipelineId
+
+newtype BranchName = BranchName String
+derive newtype instance readforeignBranchName :: ReadForeign BranchName
+derive newtype instance writeforeignBranchName :: WriteForeign BranchName
+
+newtype ISODateString = ISODateString String
+derive newtype instance readforeignISODateString :: ReadForeign ISODateString
+derive newtype instance writeforeignISODateString :: WriteForeign ISODateString
+
+
 type Project =
-  { id   :: Int
-  , name :: String
+  { id   :: ProjectId
+  , name :: ProjectName
   }
 
 type User =
@@ -23,24 +51,24 @@ type User =
 
 type Commit =
   { title    :: String
-  , short_id :: String
+  , short_id :: CommitShortHash
   }
 
 type Pipeline =
-  { id     :: Int
-  , status :: String -- TODO: make enum?
+  { id     :: PipelineId
+  , status :: PipelineStatus
   }
 
 type Job =
   { project     :: Maybe Project
   , user        :: User
   , commit      :: Commit
-  , ref         :: String
+  , ref         :: BranchName
   , pipeline    :: Pipeline
-  , status      :: String -- TODO: make enum
-  , created_at  :: String
-  , started_at  :: Maybe String
-  , finished_at :: Maybe String
+  , status      :: JobStatus
+  , created_at  :: ISODateString
+  , started_at  :: Maybe ISODateString
+  , finished_at :: Maybe ISODateString
   }
 
 type Projects = Array Project
@@ -65,7 +93,7 @@ getJobs :: forall a. BaseUrl -> Token -> Project -> Aff (ajax :: AJAX | a) Jobs
 getJobs (BaseUrl baseUrl) (Token token) project = do
   let url = baseUrl
             <> "/api/v4/projects/"
-            <> show project.id
+            <> writeJSON project.id -- same as show in this case
             <> "/jobs?private_token="
             <> token
             <> "&per_page=100"
