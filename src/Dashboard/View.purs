@@ -123,9 +123,18 @@ formatCommit :: ∀ p a. Commit -> HTML p a
 formatCommit commit =
   H.div
     [ ]
-    [ ]
+    [ authorImage commit.img
+    , divider
+    , fontAwesome CodeFork []
+    , H.b_ [ H.text commit.branch ]
+    , divider
+    , fontAwesome Code []
+    , H.text commit.hash
+    , H.br_
+    , H.div
+        [ P.classes [ ClassName "truncate" ] ]
+        [ H.text commit.message ]
+    ]
   where
     divider =
-      H.span
-        [ ]
-        [ ]
+      H.span [ P.style (CSS.marginLeft (1.0 # em)) ] [ ]
