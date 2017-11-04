@@ -24,24 +24,22 @@ type PipelineRow =
 
 rowColors :: PipelineStatus -> ClassName
 rowColors status = case status of
-  "running"  -> ClassName "bg-primary"
-  "pending"  -> ClassName "bg-info"
-  "success"  -> ClassName "bg-success"
-  "failed"   -> ClassName "bg-danger"
-  "canceled" -> ClassName "bg-warning"
-  "skipped"  -> ClassName "bg-none"
-  _          -> ClassName "bg-none"
+  Running  -> ClassName "bg-primary"
+  Pending  -> ClassName "bg-info"
+  Success  -> ClassName "bg-success"
+  Failed   -> ClassName "bg-danger"
+  Canceled -> ClassName "bg-warning"
+  Skipped  -> ClassName "bg-none"
 
 -- TODO: return an HTML element instead. See status2icon
 statusIcons :: JobStatus -> String
 statusIcons status = case status of
-  "created"  -> "dot-circle-o"
-  "manual"   -> "user-circle-o"
-  "running"  -> "refresh"
-  "pending"  -> "question-circle-o"
-  "success"  -> "check-circle-o"
-  "failed"   -> "times-circle-o"
-  "canceled" -> "stop-circle-o"
-  "skipped"  -> "arrow-circle-o-right"
-  _          -> ""
+  JobCreated  -> "dot-circle-o"
+  JobManual   -> "user-circle-o"
+  JobRunning  -> "refresh"
+  JobPending  -> "question-circle-o"
+  JobSuccess  -> "check-circle-o"
+  JobFailed   -> "times-circle-o"
+  JobCanceled -> "stop-circle-o"
+  JobSkipped  -> "arrow-circle-o-right"
 

@@ -4,7 +4,11 @@ import Prelude
 
 import Control.Monad.Aff (Aff, error, throwError)
 import Data.Either (Either(..))
+import Data.Foreign.Generic.EnumEncoding (genericDecodeEnum, genericEncodeEnum)
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
+import Data.String (toLower, drop)
 import Network.HTTP.Affjax (AJAX, get)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Simple.JSON (class ReadForeign, class WriteForeign, readJSON, writeJSON)
@@ -12,8 +16,43 @@ import Simple.JSON (class ReadForeign, class WriteForeign, readJSON, writeJSON)
 newtype BaseUrl = BaseUrl String
 newtype Token = Token String
 
-type PipelineStatus = String -- TODO: make enum
-type JobStatus      = String -- TODO: make enum
+data PipelineStatus
+  = Running
+  | Pending
+  | Success
+  | Failed
+  | Canceled
+  | Skipped
+
+derive instance eqPipelineStatus :: Eq PipelineStatus
+derive instance genericPipelineStatus :: Generic PipelineStatus _
+
+instance readForeignPipelineStatus :: ReadForeign PipelineStatus where
+  readImpl = genericDecodeEnum {constructorTagTransform: toLower}
+instance writeForeignPipelineStatus :: WriteForeign PipelineStatus where
+  writeImpl = genericEncodeEnum {constructorTagTransform: toLower}
+instance showPipelineStatus :: Show PipelineStatus where
+  show = genericShow
+
+data JobStatus
+  = JobCreated
+  | JobManual
+  | JobRunning
+  | JobPending
+  | JobSuccess
+  | JobFailed
+  | JobCanceled
+  | JobSkipped
+
+derive instance eqJobStatus :: Eq JobStatus
+derive instance genericJobeStatus :: Generic JobStatus _
+
+instance readForeignJobStatus :: ReadForeign JobStatus where
+  readImpl = genericDecodeEnum {constructorTagTransform: (drop 3) <<< toLower}
+instance writeForeignJobStatus :: WriteForeign JobStatus where
+  writeImpl = genericEncodeEnum {constructorTagTransform: (drop 3) <<< toLower}
+instance showJobStatus :: Show JobStatus where
+  show = genericShow
 
 newtype ProjectId = ProjectId Int
 derive newtype instance readforeignProjectId :: ReadForeign ProjectId
