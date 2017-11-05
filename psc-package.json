@@ -13,6 +13,6 @@
         "psci-support",
         "console",
         "eff",
-		    "generics-rep"
+        "generics-rep"
     ]
 }
