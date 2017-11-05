@@ -12,14 +12,6 @@ import CSS as CSS
 import CSS.TextAlign as CSS
 import CSS (px, em)
 
-cell :: ∀ p i. HTML p i -> HTML p i
-cell content =
-  H.td
-    [ P.style do
-        CSS.textWhitespace CSS.whitespaceNoWrap
-    ]
-    [ content ]
-
 authorImage :: ∀ p i. String -> HTML p i
 authorImage url =
   H.img
@@ -105,10 +97,10 @@ statusIcon status =
       Skipped  -> ArrowCircleORight
     []
 
-type Pipeline = { id :: String }
+type Pipeline = { id :: String, status :: Status, repo :: String, commit :: Commit, stages :: Array Status, runningTime :: String}
 
-formatStatus :: ∀ p a. Pipeline -> Status -> HTML p a
-formatStatus { id } status =
+formatStatus :: ∀ p a. Pipeline -> HTML p a
+formatStatus { id, status } =
   H.div
     [ P.style do
         CSS.paddingLeft (2.0 # em)
@@ -156,3 +148,30 @@ formatTimes { when, runningTime } =
     , fontAwesome Calendar []
     , H.text when
     ]
+
+rowColor :: Status -> ClassName
+rowColor _ = ClassName "FIXME"
+
+formatPipeline :: ∀ p i. Pipeline -> HTML p i
+formatPipeline pipeline =
+    row (cell <$> cells)
+  where
+   cells =
+     [ [ formatStatus pipeline ]
+     , [ H.br_, H.text pipeline.repo, H.br_ ]
+     , [ formatCommit pipeline.commit ]
+     , statusIcon <$> pipeline.stages
+     , [ formatTimes { when: "FIXME ago", runningTime: pipeline.runningTime } ]
+     ]
+
+   cell :: ∀ p i. Array (HTML p i) -> HTML p i
+   cell =
+     H.td
+       [ P.style do
+           CSS.textWhitespace CSS.whitespaceNoWrap
+       ]
+
+   row :: ∀ p i. Array (HTML p i) -> HTML p i
+   row =
+     H.tr
+       [ P.classes [ rowColor pipeline.status ] ]
