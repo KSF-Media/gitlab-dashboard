@@ -9,6 +9,7 @@ import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.String as String
 import CSS as CSS
+import CSS.TextAlign as CSS
 import CSS (px, em)
 
 cell :: ∀ p i. HTML p i -> HTML p i
@@ -138,3 +139,20 @@ formatCommit commit =
   where
     divider =
       H.span [ P.style (CSS.marginLeft (1.0 # em)) ] [ ]
+
+formatTimes
+  :: ∀ p a.
+     { when :: String, runningTime :: String }
+  -> HTML p a
+formatTimes { when, runningTime } =
+  H.div
+    [ P.style do
+        CSS.textAlign CSS.rightTextAlign
+        CSS.paddingRight (2.0 # em)
+    ]
+    [ fontAwesome ClockO []
+    , H.text runningTime
+    , H.br_
+    , fontAwesome Calendar []
+    , H.text when
+    ]
