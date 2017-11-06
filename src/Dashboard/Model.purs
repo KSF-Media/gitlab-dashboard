@@ -1,12 +1,14 @@
 module Dashboard.Model where
 
+import Data.Array
+import Data.DateTime
+import Data.JSDate
+import Data.NonEmpty
+import Data.Time.Duration
+import Data.URI
+import Gitlab
 import Prelude
 
-import Gitlab
-import Data.URI
-import Data.JSDate
-import Data.DateTime
-import Data.Time.Duration
 import Halogen.HTML.Core (ClassName(..))
 
 type PipelineRow =
@@ -42,4 +44,14 @@ statusIcons status = case status of
   JobFailed   -> "times-circle-o"
   JobCanceled -> "stop-circle-o"
   JobSkipped  -> "arrow-circle-o-right"
+
+getUniqueStages :: Jobs -> Array JobStatus
+getUniqueStages js = map (\j -> j.status) $ sortWith (\j -> j.id) lastJobs
+  where
+    grouped = groupBy (\a b -> a.name == b.name) (sortWith (\j -> j.name) js)
+    lastJobs = catMaybes
+               $ map (\g -> last
+                            $ sortWith (\j -> j.id)
+                            $ fromNonEmpty (:) g)
+               grouped
 
