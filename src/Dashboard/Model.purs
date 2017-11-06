@@ -46,12 +46,16 @@ statusIcons status = case status of
   JobSkipped  -> "arrow-circle-o-right"
 
 getUniqueStages :: Jobs -> Array JobStatus
-getUniqueStages js = map (\j -> j.status) $ sortWith (\j -> j.id) lastJobs
+getUniqueStages jobs = map jobStatus
+                       $ sortWith jobId
+                       $ catMaybes
+                       $ map (\grp -> last
+                                      $ sortWith jobId
+                                      $ fromNonEmpty (:) grp)
+                       $ groupBy (\a b -> a.name == b.name)
+                       $ sortWith jobName jobs
   where
-    grouped = groupBy (\a b -> a.name == b.name) (sortWith (\j -> j.name) js)
-    lastJobs = catMaybes
-               $ map (\g -> last
-                            $ sortWith (\j -> j.id)
-                            $ fromNonEmpty (:) g)
-               grouped
+    jobId     = \j -> j.id
+    jobStatus = \j -> j.status
+    jobName   = \j -> j.name
 
