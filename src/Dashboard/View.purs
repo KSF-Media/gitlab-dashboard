@@ -1,23 +1,25 @@
 module Dashboard.View where
 
 import Prelude
-import Halogen.HTML (HTML)
+
+import Halogen.HTML (HTML, ClassName (..))
 import Halogen.HTML as H
 import Halogen.HTML.Properties as P
-import Halogen.HTML.CSS (style) as P
+import Halogen.HTML.CSS (style)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.String as String
 import CSS as CSS
 import CSS.TextAlign as CSS
 import CSS (px, em)
+import Gitlab
 
 authorImage :: ∀ p i. String -> HTML p i
 authorImage url =
   H.img
     [ P.height 20
     , P.width 20
-    , P.style do
+    , style do
         CSS.borderRadius (20.0 # px) (20.0 # px) (20.0 # px) (20.0 # px)
     ]
 
@@ -64,21 +66,6 @@ fontAwesomeClasses :: Icon -> Array ClassName
 fontAwesomeClasses icon =
   ClassName <$> [ "fa", "fa-" <> iconName icon ]
 
-data JobStatus
-  = JobCreated
-  | JobManual
-  | JobRunning
-  | JobPending
-  | JobSuccess
-  | JobFailed
-  | JobCanceled
-  | JobSkipped
-
-derive instance genericJobStatus :: Generic JobStatus _
-
-instance showJobStatus :: Show JobStatus where
-  show = genericShow
-
 statusIcon :: ∀ p i. JobStatus -> HTML p i
 statusIcon JobRunning =
   H.span
@@ -98,25 +85,12 @@ statusIcon status =
     []
 
 
-data PipelineStatus
-  = Running
-  | Pending
-  | Success
-  | Failed
-  | Canceled
-  | Skipped
-
-derive instance genericPipelineStatus :: Generic PipelineStatus _
-
-instance showPipelineStatus :: Show PipelineStatus where
-  show = genericShow
-
 type Pipeline = { id :: String, status :: PipelineStatus, repo :: String, commit :: Commit, stages :: Array JobStatus, runningTime :: String}
 
 formatStatus :: ∀ p a. Pipeline -> HTML p a
 formatStatus { id, status } =
   H.div
-    [ P.style do
+    [ style do
         CSS.paddingLeft (2.0 # em)
     ]
     [ H.text $ "#" <> id
@@ -144,7 +118,7 @@ formatCommit commit =
     ]
   where
     divider =
-      H.span [ P.style (CSS.marginLeft (1.0 # em)) ] [ ]
+      H.span [ style (CSS.marginLeft (1.0 # em)) ] [ ]
 
 formatTimes
   :: ∀ p a.
@@ -152,7 +126,7 @@ formatTimes
   -> HTML p a
 formatTimes { when, runningTime } =
   H.div
-    [ P.style do
+    [ style do
         CSS.textAlign CSS.rightTextAlign
         CSS.paddingRight (2.0 # em)
     ]
@@ -185,14 +159,14 @@ formatPipeline pipeline =
      , [ formatTimes { when: "FIXME ago", runningTime: pipeline.runningTime } ]
      ]
 
-   cell :: ∀ p i. Array (HTML p i) -> HTML p i
+   cell :: Array (HTML p i) -> HTML p i
    cell =
      H.td
-       [ P.style do
+       [ style do
            CSS.textWhitespace CSS.whitespaceNoWrap
        ]
 
-   row :: ∀ p i. Array (HTML p i) -> HTML p i
+   row :: Array (HTML p i) -> HTML p i
    row =
      H.tr
        [ P.classes [ rowColor pipeline.status ] ]
