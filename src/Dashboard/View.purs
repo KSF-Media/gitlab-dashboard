@@ -64,40 +64,54 @@ fontAwesomeClasses :: Icon -> Array ClassName
 fontAwesomeClasses icon =
   ClassName <$> [ "fa", "fa-" <> iconName icon ]
 
-data Status
-  = Created
-  | Manual
-  | Running
-  | Pending
-  | Success
-  | Failed
-  | Canceled
-  | Skipped
+data JobStatus
+  = JobCreated
+  | JobManual
+  | JobRunning
+  | JobPending
+  | JobSuccess
+  | JobFailed
+  | JobCanceled
+  | JobSkipped
 
-derive instance genericStatus :: Generic Status _
+derive instance genericJobStatus :: Generic JobStatus _
 
-instance showStatus :: Show Status where
+instance showJobStatus :: Show JobStatus where
   show = genericShow
 
-statusIcon :: ∀ p i. Status -> HTML p i
-statusIcon Running =
+statusIcon :: ∀ p i. JobStatus -> HTML p i
+statusIcon JobRunning =
   H.span
     [ P.classes (fontAwesomeClasses Stack) ]
     [ ]
 statusIcon status =
   fontAwesome
     case status of
-      Created  -> DotCircleO
-      Manual   -> UserCircleO
-      Running  -> Refresh
-      Pending  -> QuestionCircleO
-      Success  -> CheckCircleO
-      Failed   -> TimesCircleO
-      Canceled -> StopCircleO
-      Skipped  -> ArrowCircleORight
+      JobCreated  -> DotCircleO
+      JobManual   -> UserCircleO
+      JobRunning  -> Refresh
+      JobPending  -> QuestionCircleO
+      JobSuccess  -> CheckCircleO
+      JobFailed   -> TimesCircleO
+      JobCanceled -> StopCircleO
+      JobSkipped  -> ArrowCircleORight
     []
 
-type Pipeline = { id :: String, status :: Status, repo :: String, commit :: Commit, stages :: Array Status, runningTime :: String}
+
+data PipelineStatus
+  = Running
+  | Pending
+  | Success
+  | Failed
+  | Canceled
+  | Skipped
+
+derive instance genericPipelineStatus :: Generic PipelineStatus _
+
+instance showPipelineStatus :: Show PipelineStatus where
+  show = genericShow
+
+type Pipeline = { id :: String, status :: PipelineStatus, repo :: String, commit :: Commit, stages :: Array JobStatus, runningTime :: String}
 
 formatStatus :: ∀ p a. Pipeline -> HTML p a
 formatStatus { id, status } =
@@ -149,8 +163,15 @@ formatTimes { when, runningTime } =
     , H.text when
     ]
 
-rowColor :: Status -> ClassName
-rowColor _ = ClassName "FIXME"
+rowColor :: PipelineStatus -> ClassName
+rowColor =
+  case _ of
+    Running  -> ClassName "bg-primary"
+    Pending  -> ClassName "bg-info"
+    Success  -> ClassName "bg-success"
+    Failed   -> ClassName "bg-danger"
+    Canceled -> ClassName "bg-warning"
+    Skipped  -> ClassName "bg-none"
 
 formatPipeline :: ∀ p i. Pipeline -> HTML p i
 formatPipeline pipeline =
