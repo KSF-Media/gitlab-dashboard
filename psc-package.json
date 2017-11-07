@@ -13,9 +13,12 @@
         "argonaut-core",
         "aff",
         "halogen",
+        "css",
+        "halogen-css",
         "prelude",
         "psci-support",
         "console",
-        "eff"
+        "eff",
+        "generics-rep"
     ]
 }
