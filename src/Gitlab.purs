@@ -59,6 +59,8 @@ derive newtype instance readforeignProjectId :: ReadForeign ProjectId
 derive newtype instance writeforeignProjectId :: WriteForeign ProjectId
 
 newtype ProjectName = ProjectName String
+derive newtype instance eqProjectName :: Eq ProjectName
+derive newtype instance ordProjectName :: Ord ProjectName
 derive newtype instance readforeignProjectName :: ReadForeign ProjectName
 derive newtype instance writeforeignProjectName :: WriteForeign ProjectName
 
