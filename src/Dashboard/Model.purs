@@ -3,11 +3,15 @@ module Dashboard.Model where
 import Data.Array
 import Data.DateTime
 import Data.JSDate
-import Data.NonEmpty
+import Data.NonEmpty (NonEmpty)
+import Data.NonEmpty as NE
 import Data.Time.Duration
-import Data.URI
+import Data.URI (URI)
+import Data.URI as URI
 import Gitlab
 import Prelude
+import Data.Maybe
+import Data.Either
 
 import Halogen.HTML.Core (ClassName(..))
 
@@ -20,7 +24,7 @@ type PipelineRow =
   , status      :: PipelineStatus
   , id          :: PipelineId
   , project     :: Project
-  , stages      :: Jobs
+  , stages      :: Array JobStatus
   , duration    :: Milliseconds
   }
 
@@ -46,16 +50,11 @@ statusIcons status = case status of
   JobSkipped  -> "arrow-circle-o-right"
 
 getUniqueStages :: Jobs -> Array JobStatus
-getUniqueStages jobs = map jobStatus
-                       $ sortWith jobId
-                       $ catMaybes
-                       $ map (\grp -> last
-                                      $ sortWith jobId
-                                      $ fromNonEmpty (:) grp)
+getUniqueStages jobs = map _.status
+                       $ sortWith _.id
+                       $ mapMaybe (\grp -> last
+                                           $ sortWith _.id
+                                           $ NE.fromNonEmpty (:) grp)
                        $ groupBy (\a b -> a.name == b.name)
-                       $ sortWith jobName jobs
-  where
-    jobId     = \j -> j.id
-    jobStatus = \j -> j.status
-    jobName   = \j -> j.name
+                       $ sortWith _.name jobs
 
