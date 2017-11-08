@@ -8,6 +8,7 @@ import Data.Foreign.Generic.EnumEncoding (genericDecodeEnum, genericEncodeEnum)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype)
 import Data.String (toLower, drop)
 import Network.HTTP.Affjax (AJAX, get)
 import Network.HTTP.StatusCode (StatusCode(..))
@@ -59,6 +60,7 @@ derive newtype instance readforeignProjectId :: ReadForeign ProjectId
 derive newtype instance writeforeignProjectId :: WriteForeign ProjectId
 
 newtype ProjectName = ProjectName String
+derive instance newtypeProjectName :: Newtype ProjectName _
 derive newtype instance eqProjectName :: Eq ProjectName
 derive newtype instance ordProjectName :: Ord ProjectName
 derive newtype instance readforeignProjectName :: ReadForeign ProjectName

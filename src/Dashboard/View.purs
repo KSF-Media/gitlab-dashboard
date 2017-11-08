@@ -1,18 +1,24 @@
 module Dashboard.View where
 
+import Dashboard.Model
+import Gitlab
 import Prelude
 
-import Halogen.HTML (HTML, ClassName (..))
-import Halogen.HTML as H
-import Halogen.HTML.Properties as P
-import Halogen.HTML.CSS (style)
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
-import Data.String as String
+import CSS (px, em)
 import CSS as CSS
 import CSS.TextAlign as CSS
-import CSS (px, em)
-import Gitlab
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Show (genericShow)
+import Data.JSDate (JSDate)
+import Data.Newtype (unwrap)
+import Data.String as String
+import Data.Time.Duration (Milliseconds(..))
+import Data.URI (printURI)
+import Halogen.HTML (HTML, ClassName(..))
+import Halogen.HTML as H
+import Halogen.HTML.CSS (style)
+import Halogen.HTML.Properties as P
+import Moment (formatMillis, fromNow)
 
 authorImage :: ∀ p i. String -> HTML p i
 authorImage url =
@@ -85,56 +91,58 @@ statusIcon status =
     []
 
 
-type Pipeline = { id :: String, status :: PipelineStatus, repo :: String, commit :: Commit, stages :: Array JobStatus, runningTime :: String}
-
-formatStatus :: ∀ p a. Pipeline -> HTML p a
-formatStatus { id, status } =
+formatStatus :: ∀ p a. PipelineRow -> HTML p a
+formatStatus { id: PipelineId id, status } =
   H.div
     [ style do
         CSS.paddingLeft (2.0 # em)
     ]
-    [ H.text $ "#" <> id
+    [ H.text $ "#" <> show id
     , H.br []
     , H.text $ String.toUpper $ show status
     ]
 
-type Commit = { branch :: String, hash :: String, img :: String, message :: String }
 
-formatCommit :: ∀ p a. Commit -> HTML p a
-formatCommit commit =
+formatCommit :: ∀ p a. CommitRow -> HTML p a
+formatCommit { authorImg
+             , commitTitle
+             , hash: CommitShortHash hash
+             , branch: BranchName branch
+             } =
   H.div
     [ ]
-    [ authorImage commit.img
+    [ authorImage $ printURI authorImg
     , divider
     , fontAwesome CodeFork []
-    , H.b_ [ H.text commit.branch ]
+    , H.b_ [ H.text branch ]
     , divider
     , fontAwesome Code []
-    , H.text commit.hash
+    , H.text hash
     , H.br_
     , H.div
         [ P.classes [ ClassName "truncate" ] ]
-        [ H.text commit.message ]
+        [ H.text commitTitle ]
     ]
   where
     divider =
       H.span [ style (CSS.marginLeft (1.0 # em)) ] [ ]
 
 formatTimes
-  :: ∀ p a.
-     { when :: String, runningTime :: String }
+  :: ∀ p a. { when     :: JSDate
+            , duration :: Milliseconds
+            }
   -> HTML p a
-formatTimes { when, runningTime } =
+formatTimes { when, duration } =
   H.div
     [ style do
         CSS.textAlign CSS.rightTextAlign
         CSS.paddingRight (2.0 # em)
     ]
     [ fontAwesome ClockO []
-    , H.text runningTime
+    , H.text $ formatMillis duration
     , H.br_
     , fontAwesome Calendar []
-    , H.text when
+    , H.text $ fromNow when
     ]
 
 rowColor :: PipelineStatus -> ClassName
@@ -147,16 +155,16 @@ rowColor =
     Canceled -> ClassName "bg-warning"
     Skipped  -> ClassName "bg-none"
 
-formatPipeline :: ∀ p i. Pipeline -> HTML p i
+formatPipeline :: ∀ p i. PipelineRow -> HTML p i
 formatPipeline pipeline =
     row (cell <$> cells)
   where
    cells =
      [ [ formatStatus pipeline ]
-     , [ H.br_, H.text pipeline.repo, H.br_ ]
+     , [ H.br_, H.text $ unwrap pipeline.project.name, H.br_ ]
      , [ formatCommit pipeline.commit ]
      , statusIcon <$> pipeline.stages
-     , [ formatTimes { when: "FIXME ago", runningTime: pipeline.runningTime } ]
+     , [ formatTimes { when: pipeline.created, duration: pipeline.duration } ]
      ]
 
    cell :: Array (HTML p i) -> HTML p i
