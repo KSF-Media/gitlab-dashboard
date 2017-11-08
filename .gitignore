@@ -2,3 +2,4 @@ node_modules
 output
 .psc-package
 app.js
+.psci_modules
