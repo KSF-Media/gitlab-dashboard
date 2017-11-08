@@ -2,25 +2,30 @@ module Dashboard.Model where
 
 import Data.Array
 import Data.DateTime
+import Data.Either
 import Data.JSDate
-import Data.NonEmpty (NonEmpty)
-import Data.NonEmpty as NE
+import Data.Maybe
 import Data.Time.Duration
-import Data.URI (URI)
-import Data.URI as URI
 import Gitlab
 import Prelude
-import Data.Maybe
-import Data.Either
 
+import Data.NonEmpty (NonEmpty)
+import Data.NonEmpty as NE
+import Data.URI (URI)
+import Data.URI as URI
 import Halogen.HTML.Core (ClassName(..))
 
-type PipelineRow =
-  { authorImg   :: URI
-  , commitTitle :: String
+
+type CommitRow =
+  { branch      :: BranchName
   , hash        :: CommitShortHash
-  , branch      :: BranchName
-  , created     :: DateTime
+  , authorImg   :: URI
+  , commitTitle :: String
+  }
+
+type PipelineRow =
+  { commit      :: CommitRow
+  , created     :: JSDate
   , status      :: PipelineStatus
   , id          :: PipelineId
   , project     :: Project
@@ -29,7 +34,7 @@ type PipelineRow =
   }
 
 
-getUniqueStages :: Jobs -> Array JobStatus
+getUniqueStages :: Array Job -> Array JobStatus
 getUniqueStages jobs = map _.status
                        $ sortWith _.id
                        $ mapMaybe (\grp -> last
@@ -38,3 +43,17 @@ getUniqueStages jobs = map _.status
                        $ groupBy (\a b -> a.name == b.name)
                        $ sortWith _.name jobs
 
+
+{-
+makePipelineRow :: NonEmpty Array Job -> PipelineRow
+makePipelineRow jobs = ?a
+  where
+    job = NE.head jobs
+  --{ authorImg: throwLeft $ URI.runParseURI  }
+
+
+makePipelineRows :: Jobs -> Array PipelineRow
+makePipelineRows jobs = map makePipelineRow
+                        $ groupBy (\a b -> a.project.name == b.project.name)
+                        $ sortWith (\j -> j.project.name) jobs
+-}
