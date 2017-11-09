@@ -3,16 +3,21 @@ module Gitlab where
 import Prelude
 
 import Control.Monad.Aff (Aff, error, throwError)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import Data.Either (Either(..))
 import Data.Foreign.Generic.EnumEncoding (genericDecodeEnum, genericEncodeEnum)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
+import Data.JSDate (JSDate, LOCALE, parse, toDateString)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
+import Data.Record (set)
 import Data.String (toLower, drop)
 import Network.HTTP.Affjax (AJAX, get)
 import Network.HTTP.StatusCode (StatusCode(..))
 import Simple.JSON (class ReadForeign, class WriteForeign, readJSON, writeJSON)
+import Type.Prelude (SProxy(..))
 
 newtype BaseUrl = BaseUrl String
 newtype Token = Token String
@@ -89,10 +94,6 @@ newtype BranchName = BranchName String
 derive newtype instance readforeignBranchName :: ReadForeign BranchName
 derive newtype instance writeforeignBranchName :: WriteForeign BranchName
 
-newtype ISODateString = ISODateString String
-derive newtype instance readforeignISODateString :: ReadForeign ISODateString
-derive newtype instance writeforeignISODateString :: WriteForeign ISODateString
-
 
 type Project =
   { id   :: ProjectId
@@ -122,9 +123,9 @@ type Job =
   , status      :: JobStatus
   , id          :: JobId
   , name        :: JobName
-  , created_at  :: ISODateString
-  , started_at  :: Maybe ISODateString
-  , finished_at :: Maybe ISODateString
+  , created_at  :: JSDate
+  , started_at  :: Maybe JSDate
+  , finished_at :: Maybe JSDate
   }
 
 type Projects = Array Project
@@ -145,7 +146,9 @@ getProjects (BaseUrl baseUrl) (Token token) = do
       throwError $ error ("Failed to parse projects: " <> show e)
     Right projects -> pure projects
 
-getJobs :: forall a. BaseUrl -> Token -> Project -> Aff (ajax :: AJAX | a) Jobs
+getJobs :: forall a.
+           BaseUrl -> Token -> Project
+           -> Aff (ajax :: AJAX, locale :: LOCALE | a) Jobs
 getJobs (BaseUrl baseUrl) (Token token) project = do
   let url = baseUrl
             <> "/api/v4/projects/"
@@ -159,7 +162,17 @@ getJobs (BaseUrl baseUrl) (Token token) project = do
   case readJSON jobsRes.response of
     Left e -> do
       throwError $ error ("Failed to parse jobs: " <> show e)
-    Right jobs -> pure $ map (setProject project) jobs
+    Right jobs -> pure $ map (setProject project) $ map castDates jobs
     where
       setProject :: Project -> Job -> Job
       setProject p j = j {project = Just p}
+
+      -- I know, but it's just for accessing locale
+      readJSDate :: String -> JSDate
+      readJSDate date = unsafePerformEff $ parse date
+
+      castDates job = job
+        { created_at = readJSDate job.created_at
+        , started_at = (Just <<< readJSDate) =<< job.started_at
+        , finished_at = (Just <<< readJSDate) =<< job.finished_at
+        }
