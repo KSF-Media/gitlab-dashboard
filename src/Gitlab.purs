@@ -3,16 +3,14 @@ module Gitlab where
 import Prelude
 
 import Control.Monad.Aff (Aff, error, throwError)
-import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
 import Data.Either (Either(..))
 import Data.Foreign.Generic.EnumEncoding (genericDecodeEnum, genericEncodeEnum)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.JSDate (JSDate, LOCALE, parse, toDateString)
+import Data.JSDate (JSDate, parse)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
-import Data.Record (set)
 import Data.String (toLower, drop)
 import Network.HTTP.Affjax (AJAX, get)
 import Network.HTTP.StatusCode (StatusCode(..))
@@ -80,6 +78,7 @@ derive newtype instance readforeignPipelineId :: ReadForeign PipelineId
 derive newtype instance writeforeignPipelineId :: WriteForeign PipelineId
 
 newtype JobId = JobId Int
+derive newtype instance eqJobId :: Eq JobId
 derive newtype instance ordJobId :: Ord JobId
 derive newtype instance readforeignJobId :: ReadForeign JobId
 derive newtype instance writeforeignJobId :: WriteForeign JobId
@@ -148,7 +147,7 @@ getProjects (BaseUrl baseUrl) (Token token) = do
 
 getJobs :: forall a.
            BaseUrl -> Token -> Project
-           -> Aff (ajax :: AJAX, locale :: LOCALE | a) Jobs
+           -> Aff (ajax :: AJAX | a) Jobs
 getJobs (BaseUrl baseUrl) (Token token) project = do
   let url = baseUrl
             <> "/api/v4/projects/"

@@ -7,9 +7,10 @@ import Control.Monad.Aff.Console (CONSOLE, log)
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import Gitlab (BaseUrl(..), ProjectId(..), ProjectName(..), Token(..), getJobs, getProjects)
+import Global.Unsafe (unsafeStringify)
 import Network.HTTP.Affjax (AJAX)
-import Simple.JSON (writeJSON)
 import URLSearchParams as URLParams
+
 
 type Main = forall e.
             Eff ( ajax :: AJAX
@@ -29,7 +30,7 @@ main = do
   -- TODO: display error if parameters are not provided
   launchAff $ do
     projects <- getProjects baseUrl token
-    log $ writeJSON projects
+    log $ unsafeStringify projects
     let proj = {name: (ProjectName "faro"), id: (ProjectId 64)} -- example project with pipelines
     jobs <- getJobs baseUrl token proj
-    log $ writeJSON jobs
+    log $ unsafeStringify jobs
