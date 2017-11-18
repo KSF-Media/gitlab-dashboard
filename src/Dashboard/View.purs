@@ -13,7 +13,6 @@ import Data.JSDate (JSDate)
 import Data.Newtype (unwrap)
 import Data.String as String
 import Data.Time.Duration (Milliseconds(..))
-import Data.URI (printURI)
 import Halogen.HTML (HTML, ClassName(..))
 import Halogen.HTML as H
 import Halogen.HTML.CSS (style)
@@ -111,7 +110,7 @@ formatCommit { authorImg
              } =
   H.div
     [ ]
-    [ authorImage $ printURI authorImg
+    [ authorImage authorImg
     , divider
     , fontAwesome CodeFork []
     , H.b_ [ H.text branch ]

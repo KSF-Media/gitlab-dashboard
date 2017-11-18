@@ -19,7 +19,7 @@ import Halogen.HTML.Core (ClassName(..))
 type CommitRow =
   { branch      :: BranchName
   , hash        :: CommitShortHash
-  , authorImg   :: URI
+  , authorImg   :: String
   , commitTitle :: String
   }
 
