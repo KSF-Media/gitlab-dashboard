@@ -1,20 +1,16 @@
 module Dashboard.Model where
 
-import Data.Array
-import Data.DateTime
-import Data.Either
-import Data.JSDate
-import Data.Maybe
-import Data.Time.Duration
-import Gitlab
 import Prelude
+import Data.Array
+import Gitlab
 
+import Data.DateTime (DateTime, diff)
+import Data.JSDate (JSDate, toDateTime)
+import Data.Maybe (Maybe, fromJust, fromMaybe)
 import Data.NonEmpty (NonEmpty)
 import Data.NonEmpty as NE
-import Data.URI (URI)
-import Data.URI as URI
-import Halogen.HTML.Core (ClassName(..))
-
+import Data.Time.Duration (Milliseconds(..))
+import Partial.Unsafe (unsafePartial)
 
 type CommitRow =
   { branch      :: BranchName
@@ -43,17 +39,53 @@ getUniqueStages jobs = map _.status
                        $ groupBy (\a b -> a.name == b.name)
                        $ sortWith _.name jobs
 
+defaultProject :: Project
+defaultProject = {id: (ProjectId 0), name: (ProjectName "")}
 
-{-
 makePipelineRow :: NonEmpty Array Job -> PipelineRow
-makePipelineRow jobs = ?a
+makePipelineRow jobs =
+  { status: job.pipeline.status
+  , id: job.pipeline.id
+  , project: fromMaybe defaultProject job.project
+  , stages: getUniqueStages jobs'
+  , created: createdTime
+  , duration: fromMaybe (Milliseconds 0.0) $ runningTime jobs'
+  , commit: { branch: job.ref
+            , hash: job.commit.short_id
+            , commitTitle: job.commit.title
+            , authorImg: job.user.avatar_url
+            }
+  }
   where
     job = NE.head jobs
-  --{ authorImg: throwLeft $ URI.runParseURI  }
+    jobs' = NE.fromNonEmpty (:) jobs
+    createdTime = job.created_at
+
+    -- | Returns the total running time of a set of Jobs
+    --   (which should belong to the same Pipeline)
+    runningTime :: Array Job -> Maybe Milliseconds
+    runningTime pipelineJobs = do
+      -- Parse all into DateTime, get the earliest starting time
+      started  <- head
+                  $ sort
+                  $ mapMaybe (\j -> toDateTime =<< j.started_at) pipelineJobs
+      -- Parse all into DateTime, get the latest finishing time
+      finished <- head
+                  $ reverse
+                  $ sort
+                  $ mapMaybe (\j -> toDateTime =<< j.finished_at) pipelineJobs
+      pure $ diff started finished
 
 
 makePipelineRows :: Jobs -> Array PipelineRow
-makePipelineRows jobs = map makePipelineRow
-                        $ groupBy (\a b -> a.project.name == b.project.name)
-                        $ sortWith (\j -> j.project.name) jobs
--}
+makePipelineRows jobs = sortWith createdDateTime
+                        $ map makePipelineRow
+                        $ groupBy (\a b -> (getProjectName a) == (getProjectName b))
+                        $ sortWith getProjectName jobs
+  where
+    getProjectName :: Job -> ProjectName
+    getProjectName job = (fromMaybe defaultProject job.project).name
+
+    createdDateTime :: PipelineRow -> DateTime
+    createdDateTime job = unsafePartial $ fromJust $ toDateTime job.created
+
