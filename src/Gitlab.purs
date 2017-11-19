@@ -74,6 +74,8 @@ derive newtype instance readforeignCommitShortHash :: ReadForeign CommitShortHas
 derive newtype instance writeforeignCommitShortHash :: WriteForeign CommitShortHash
 
 newtype PipelineId = PipelineId Int
+derive newtype instance eqPipelineId :: Eq PipelineId
+derive newtype instance ordPipelineId :: Ord PipelineId
 derive newtype instance readforeignPipelineId :: ReadForeign PipelineId
 derive newtype instance writeforeignPipelineId :: WriteForeign PipelineId
 

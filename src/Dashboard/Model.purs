@@ -76,16 +76,13 @@ makePipelineRow jobs =
                   $ mapMaybe (\j -> toDateTime =<< j.finished_at) pipelineJobs
       pure $ diff started finished
 
-
-makePipelineRows :: Jobs -> Array PipelineRow
-makePipelineRows jobs = sortWith createdDateTime
+-- | Given all the Jobs for a Project, makes a PipelineRow out of each Pipeline
+makeProjectRows :: Jobs -> Array PipelineRow
+makeProjectRows jobs = sortWith createdDateTime
                         $ map makePipelineRow
-                        $ groupBy (\a b -> (getProjectName a) == (getProjectName b))
-                        $ sortWith getProjectName jobs
+                        $ groupBy (\a b -> (_.pipeline.id a) == (_.pipeline.id b))
+                        $ sortWith _.pipeline.id jobs
   where
-    getProjectName :: Job -> ProjectName
-    getProjectName job = (fromMaybe defaultProject job.project).name
-
     createdDateTime :: PipelineRow -> DateTime
     createdDateTime job = unsafePartial $ fromJust $ toDateTime job.created
 
