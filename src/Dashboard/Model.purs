@@ -1,8 +1,8 @@
 module Dashboard.Model where
 
-import Prelude
 import Data.Array
 import Gitlab
+import Prelude
 
 import Data.DateTime (DateTime, diff)
 import Data.JSDate (JSDate, toDateTime)
@@ -39,9 +39,6 @@ getUniqueStages jobs = map _.status
                        $ groupBy (\a b -> a.name == b.name)
                        $ sortWith _.name jobs
 
-defaultProject :: Project
-defaultProject = {id: (ProjectId 0), name: (ProjectName "")}
-
 makePipelineRow :: NonEmpty Array Job -> PipelineRow
 makePipelineRow jobs =
   { status: job.pipeline.status
@@ -59,6 +56,7 @@ makePipelineRow jobs =
   where
     job = NE.head jobs
     jobs' = NE.fromNonEmpty (:) jobs
+    defaultProject = {id: (ProjectId 0), name: (ProjectName "")}
     createdTime = job.created_at
 
     -- | Returns the total running time of a set of Jobs
@@ -78,11 +76,10 @@ makePipelineRow jobs =
 
 -- | Given all the Jobs for a Project, makes a PipelineRow out of each Pipeline
 makeProjectRows :: Jobs -> Array PipelineRow
-makeProjectRows jobs = sortWith createdDateTime
-                        $ map makePipelineRow
-                        $ groupBy (\a b -> (_.pipeline.id a) == (_.pipeline.id b))
-                        $ sortWith _.pipeline.id jobs
-  where
-    createdDateTime :: PipelineRow -> DateTime
-    createdDateTime job = unsafePartial $ fromJust $ toDateTime job.created
+makeProjectRows jobs = map makePipelineRow
+                       $ groupBy (\a b -> (_.pipeline.id a) == (_.pipeline.id b))
+                       $ sortWith _.pipeline.id jobs
+
+createdDateTime :: PipelineRow -> DateTime
+createdDateTime job = unsafePartial $ fromJust $ toDateTime job.created
 
