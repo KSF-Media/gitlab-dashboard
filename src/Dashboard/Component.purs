@@ -4,7 +4,7 @@ import Prelude
 
 import Dashboard.Model (PipelineRow, createdDateTime)
 import Dashboard.View (formatPipeline)
-import Data.Array (elem, filter, reverse, sortWith, take)
+import Data.Array as Array
 import Data.Maybe (Maybe(..))
 import Halogen as H
 import Halogen.HTML as HH
@@ -48,14 +48,13 @@ ui =
 
   eval :: Query ~> H.ComponentDSL State Query Void m
   eval = case _ of
-    UpsertProjectPipelines pipelines next -> do
-      state <- H.get
-      H.put
-        $ take 40
-        $ reverse
-        $ sortWith createdDateTime
+    UpsertProjectPipelines pipelines next -> next <$ do
+      H.modify
+        $ Array.take 40
+        <<< Array.reverse
+        <<< Array.sortWith createdDateTime
         -- Always include the pipelines passed as new data.
         -- Filter out of the state the pipelines that we have in the new data,
         -- and merge the remaining ones to get the new state.
-        $ pipelines <> filter (\pr -> not $ elem pr.id (map _.id pipelines)) state
-      pure next
+        <<< (pipelines <> _)
+        <<< Array.filter (\pr -> not $ Array.elem pr.id (map _.id pipelines))
