@@ -59,6 +59,7 @@ instance showJobStatus :: Show JobStatus where
   show = genericShow
 
 newtype ProjectId = ProjectId Int
+derive newtype instance showProjectId :: Show ProjectId
 derive newtype instance readforeignProjectId :: ReadForeign ProjectId
 derive newtype instance writeforeignProjectId :: WriteForeign ProjectId
 
@@ -153,7 +154,7 @@ getJobs :: forall a.
 getJobs (BaseUrl baseUrl) (Token token) project = do
   let url = baseUrl
             <> "/api/v4/projects/"
-            <> writeJSON project.id -- same as show in this case
+            <> show project.id
             <> "/jobs?private_token="
             <> token
             <> "&per_page=100"
