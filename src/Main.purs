@@ -32,8 +32,7 @@ pollProjects baseUrl token query = do
 
   -- Wait 30 secs and recur
   delay (Milliseconds 30000.0)
-  _ <- pollProjects baseUrl token query
-  pure unit
+  void $ pollProjects baseUrl token query
   where
     -- If list of projects is empty, return
     -- If not, take the first, get jobs, and upsert in the Component
