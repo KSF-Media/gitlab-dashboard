@@ -32,7 +32,7 @@ ui =
   render pipelines =
     HH.table
       [ HP.classes [ H.ClassName "table"
-                  , H.ClassName "table-inverse"
+                  , H.ClassName "table-dark"
                   ]
       ]
       [ HH.thead_

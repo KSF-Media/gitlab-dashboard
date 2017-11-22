@@ -10,10 +10,10 @@
   "license": "MIT",
   "repository": "https://github.com/KSF-Media/gitlab-dashboard",
   "dependencies": {
-    "bootstrap": "^4.0.0-beta",
+    "bootstrap": "4.0.0-beta.2",
     "font-awesome": "^4.7.0",
     "jquery": "^3.2.1",
-    "moment": "^2.19.1",
-    "popper.js": "^1.12.5"
+    "moment": "^2.19.2",
+    "popper.js": "^1.13.0"
   }
 }
