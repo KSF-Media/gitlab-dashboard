@@ -163,7 +163,7 @@ formatPipeline pipeline =
   where
    cells =
      [ [ formatStatus pipeline ]
-     , [ H.br_, H.text $ unwrap pipeline.project.name, H.br_ ]
+     , [ H.b_ [ H.text $ unwrap pipeline.project.name ] ]
      , [ formatCommit pipeline.commit ]
      , statusIcon <$> pipeline.stages
      , [ formatTimes { when: pipeline.created, duration: pipeline.duration } ]
