@@ -97,9 +97,6 @@ statusIcon status =
       JobSkipped  -> ArrowCircleORight
     (ClassName <$> [ "fa-2x", "align-middle" ])
 
-capitalize :: String -> String
-capitalize s = (String.toUpper $ String.take 1 s) <> (String.drop 1 s)
-
 formatStatus :: ∀ p a. PipelineRow -> HTML p a
 formatStatus { id: PipelineId id, status } =
   H.div
@@ -108,7 +105,7 @@ formatStatus { id: PipelineId id, status } =
     ]
     [ H.text $ "#" <> show id
     , H.br []
-    , H.text $ capitalize $ show status
+    , H.text $ show status
     ]
 
 
