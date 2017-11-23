@@ -65,7 +65,10 @@ iconName =
 fontAwesome :: ∀ p i. Icon -> Array ClassName -> HTML p i
 fontAwesome icon moreClasses =
   H.i
-    [ P.classes (fontAwesomeClasses icon <> moreClasses) ]
+    [ P.classes (fontAwesomeClasses icon <> moreClasses)
+    , style do
+         CSS.margin (0.0 # px) (3.0 # px) (0.0 # px) (3.0 # px)
+    ]
     [ ]
 
 fontAwesomeClasses :: Icon -> Array ClassName
