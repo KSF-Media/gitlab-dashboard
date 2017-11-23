@@ -22,7 +22,8 @@ import Moment (formatMillis, fromNow)
 authorImage :: ∀ p i. String -> HTML p i
 authorImage url =
   H.img
-    [ P.height 20
+    [ P.src url
+    , P.height 20
     , P.width 20
     , style do
         CSS.borderRadius (20.0 # px) (20.0 # px) (20.0 # px) (20.0 # px)
