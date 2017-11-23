@@ -90,6 +90,8 @@ statusIcon status =
       JobSkipped  -> ArrowCircleORight
     []
 
+capitalize :: String -> String
+capitalize s = (String.toUpper $ String.take 1 s) <> (String.drop 1 s)
 
 formatStatus :: ∀ p a. PipelineRow -> HTML p a
 formatStatus { id: PipelineId id, status } =
@@ -99,7 +101,7 @@ formatStatus { id: PipelineId id, status } =
     ]
     [ H.text $ "#" <> show id
     , H.br []
-    , H.text $ String.toUpper $ show status
+    , H.text $ capitalize $ show status
     ]
 
 
