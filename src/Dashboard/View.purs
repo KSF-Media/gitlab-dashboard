@@ -116,10 +116,10 @@ formatCommit { authorImg
     [ authorImage authorImg
     , divider
     , fontAwesome CodeFork []
-    , H.b_ [ H.text branch ]
+    , H.b_ [ H.text (" " <> branch) ]
     , divider
     , fontAwesome Code []
-    , H.text hash
+    , H.text (" " <> hash)
     , H.br_
     , H.div
         [ P.classes [ ClassName "truncate" ] ]
@@ -141,10 +141,10 @@ formatTimes { when, duration } =
         CSS.paddingRight (2.0 # em)
     ]
     [ fontAwesome ClockO []
-    , H.text $ formatMillis duration
+    , H.text (" " <> formatMillis duration)
     , H.br_
     , fontAwesome Calendar []
-    , H.text $ fromNow when
+    , H.text (" " <> fromNow when)
     ]
 
 rowColor :: PipelineStatus -> ClassName
