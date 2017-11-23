@@ -32,6 +32,7 @@ authorImage url =
 -- | TODO: Generate `purescript-fontawesome` library.
 data Icon
   = Calendar
+  | CircleO
   | ClockO
   | Code
   | CodeFork
@@ -49,6 +50,7 @@ iconName :: Icon -> String
 iconName =
   case _ of
     Calendar          -> "calendar"
+    CircleO           -> "circle-o"
     ClockO            -> "clock-o"
     Code              -> "code"
     CodeFork          -> "code-fork"
@@ -79,7 +81,9 @@ statusIcon :: ∀ p i. JobStatus -> HTML p i
 statusIcon JobRunning =
   H.span
     [ P.classes (fontAwesomeClasses Stack) ]
-    [ ]
+    [ fontAwesome CircleO [ ClassName "fa-stack-2x" ]
+    , fontAwesome Refresh [ ClassName "fa-stack-1x", ClassName "fa-inverse" ]
+    ]
 statusIcon status =
   fontAwesome
     case status of
@@ -91,7 +95,7 @@ statusIcon status =
       JobFailed   -> TimesCircleO
       JobCanceled -> StopCircleO
       JobSkipped  -> ArrowCircleORight
-    []
+    (ClassName <$> [ "fa-2x", "align-middle" ])
 
 capitalize :: String -> String
 capitalize s = (String.toUpper $ String.take 1 s) <> (String.drop 1 s)
