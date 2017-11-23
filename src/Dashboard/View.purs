@@ -173,6 +173,7 @@ formatPipeline pipeline =
    cell =
      H.td
        [ style do
+           CSS.textAlign      CSS.leftTextAlign
            CSS.textWhitespace CSS.whitespaceNoWrap
        ]
 
