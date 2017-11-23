@@ -1,6 +1,6 @@
 # Gitlab Pipelines TV Dashboard
 
-TODO: add screenshot
+![Screenshot](/screenshot.png)
 
 ## Install
 
