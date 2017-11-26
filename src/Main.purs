@@ -6,9 +6,11 @@ import Dashboard.Component as Dash
 import Control.Monad.Aff (Aff, Milliseconds(..), delay)
 import Control.Monad.Aff.Console (CONSOLE, log)
 import Control.Monad.Eff (Eff)
+import Control.Monad.Rec.Class (forever)
 import Dashboard.Model as Model
 import Data.Array (uncons)
 import Data.Maybe (Maybe(..))
+import Data.Traversable (traverse_)
 import Gitlab (BaseUrl(..), Token(..), getJobs, getProjects)
 import Global.Unsafe (unsafeStringify)
 import Halogen as H
@@ -24,30 +26,23 @@ pollProjects ::
   -> Token
   -> (Dash.Query Unit -> Aff (ajax :: AJAX, console :: CONSOLE | eff) a)
   -> Aff (ajax :: AJAX, console :: CONSOLE | eff) Unit
-pollProjects baseUrl token query = do
+pollProjects baseUrl token query = forever do
   -- Get projects, poll all of them for jobs
   log "Fetching list of projects..."
   projects <- getProjects baseUrl token
   fetchJobs projects
-
-  -- Wait 30 secs and recur
-  delay (Milliseconds 30000.0)
-  void $ pollProjects baseUrl token query
+  -- wait 30 secs
+  delay (Milliseconds 30000.0)  
   where
-    -- If list of projects is empty, return
-    -- If not, take the first, get jobs, and upsert in the Component
-    -- Then wait 1s, and recur to fetch the rest
-    fetchJobs projects = case uncons projects of
-      Nothing -> pure unit
-      Just { head: p, tail: ps } -> do
-        log $ "Fetching Jobs for Project with id: " <> unsafeStringify p.id
-        jobs <- getJobs baseUrl token p
+    -- update each job, wait 1s after each update
+    fetchJobs = traverse_ \project -> do
+        log $ "Fetching Jobs for Project with id: " <> unsafeStringify project.id
+        jobs <- getJobs baseUrl token project
         _ <- query
              $ H.action
              $ Dash.UpsertProjectPipelines
              $ Model.makeProjectRows jobs
         delay (Milliseconds 1000.0)
-        fetchJobs ps
 
 main :: forall e. Eff (HA.HalogenEffects (ajax :: AJAX, console :: CONSOLE | e)) Unit
 main = do
