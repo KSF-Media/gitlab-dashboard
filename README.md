@@ -33,7 +33,7 @@ Example: `https://ksf-media.github.io/gitlab-dashboard/index.html?private_token=
 
 ## Developing
 
-Install depencies with:
+Install dependencies with:
 
 ```bash
 npm install -g pulp psc-package
