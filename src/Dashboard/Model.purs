@@ -72,7 +72,7 @@ makePipelineRow jobs =
                   $ reverse
                   $ sort
                   $ mapMaybe (\j -> toDateTime =<< j.finished_at) pipelineJobs
-      pure $ diff started finished
+      pure $ diff finished started
 
 -- | Given all the Jobs for a Project, makes a PipelineRow out of each Pipeline
 makeProjectRows :: Jobs -> Array PipelineRow
