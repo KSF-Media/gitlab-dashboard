@@ -36,12 +36,9 @@ pollProjects baseUrl token query = forever do
   where
     -- update each job, wait 1s after each update
     fetchJobs = traverse_ \project -> do
-        log $ "Fetching Jobs for Project with id: " <> unsafeStringify project.id
-        jobs <- getJobs baseUrl token project
         _ <- query
              $ H.action
-             $ Dash.UpsertProjectPipelines
-             $ Model.makeProjectRows jobs
+             $ Dash.FetchJobs project
         delay (Milliseconds 1000.0)
 
 main :: forall e. Eff Dash.Effects Unit
