@@ -2,8 +2,10 @@ module Main where
 
 import Prelude
 
-import Control.Monad.Aff (Aff)
+import Control.Monad.Aff (Aff, Milliseconds(..), catchError, delay)
+import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Exception as Error
 import Control.Monad.Rec.Class (forever)
 import Dashboard.Component as Dash
 import Gitlab as Gitlab
@@ -17,7 +19,10 @@ pollProjects
   :: forall o. H.HalogenIO Dash.Query o (Aff Dash.Effects)
   -> Aff Dash.Effects Unit
 pollProjects io = forever do
-  void $ io.query $ H.action $ Dash.FetchProjects
+  io.query (H.action $ Dash.FetchProjects)
+    `catchError` \error -> do
+      log $ "Polling failed with error: " <> Error.message error
+      delay (Milliseconds 5000.0)
 
 main :: Eff Dash.Effects Unit
 main = do
