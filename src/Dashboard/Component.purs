@@ -6,6 +6,7 @@ import Dashboard.Model (PipelineRow, createdDateTime)
 import Dashboard.View (formatPipeline)
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
+import Gitlab (BaseUrl(..), Token(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -14,9 +15,13 @@ type State = Array PipelineRow
 
 data Query a = UpsertProjectPipelines (Array PipelineRow) a
 
+type Config =
+  { baseUrl :: BaseUrl
+  , token   :: Token
+  }
 
-ui :: forall m. H.Component HH.HTML Query Unit Void m
-ui =
+ui :: forall m. Config -> H.Component HH.HTML Query Unit Void m
+ui { baseUrl, token } =
   H.component
     { initialState: const initialState
     , render

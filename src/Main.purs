@@ -48,8 +48,9 @@ main :: forall e. Eff (HA.HalogenEffects (ajax :: AJAX, console :: CONSOLE | e))
 main = do
   token   <- Token   <$> URLParams.get "private_token"
   baseUrl <- BaseUrl <$> URLParams.get "gitlab_url"
+  let config = { baseUrl, token }
   -- TODO: display error if parameters are not provided
   HA.runHalogenAff $ do
     body <- HA.awaitBody
-    io <- runUI Dash.ui unit body
+    io <- runUI (Dash.ui config) unit body
     pollProjects baseUrl token io.query
