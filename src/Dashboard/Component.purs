@@ -20,19 +20,6 @@ import Network.HTTP.Affjax (AJAX)
 
 type State = Array PipelineRow
 
-upsertProjectPipelines :: Gitlab.Jobs -> State -> State
-upsertProjectPipelines jobs =
-  Array.take 40
-    <<< Array.reverse
-    <<< Array.sortWith createdDateTime
-    -- Always include the pipelines passed as new data.
-    -- Filter out of the state the pipelines that we have in the new data,
-    -- and merge the remaining ones to get the new state.
-    <<< (pipelines <> _)
-    <<< Array.filter (\pr -> not $ Array.elem pr.id (map _.id pipelines))
-  where
-    pipelines = makeProjectRows jobs
-
 data Query a = FetchProjects a
 
 type Effects = HalogenEffects
@@ -94,3 +81,17 @@ ui { baseUrl, token } =
   getJobs project@{ id: Gitlab.ProjectId pid } = do
     log $ "Fetching Jobs for Project with id: " <> show pid
     Gitlab.getJobs baseUrl token project  
+
+  upsertProjectPipelines :: Gitlab.Jobs -> State -> State
+  upsertProjectPipelines jobs =
+    Array.take 40
+      <<< Array.reverse
+      <<< Array.sortWith createdDateTime
+      -- Always include the pipelines passed as new data.
+      -- Filter out of the state the pipelines that we have in the new data,
+      -- and merge the remaining ones to get the new state.
+      <<< (pipelines <> _)
+      <<< Array.filter (\pr -> not $ Array.elem pr.id (map _.id pipelines))
+    where
+      pipelines = makeProjectRows jobs
+
