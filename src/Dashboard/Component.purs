@@ -33,7 +33,6 @@ upsertProjectPipelines jobs =
   where
     pipelines = makeProjectRows jobs
 
-
 data Query a = FetchProjects a
 
 type Effects = HalogenEffects
@@ -78,14 +77,20 @@ ui { baseUrl, token } =
       ]
 
   eval :: Query ~> H.ComponentDSL State Query Void (Aff Effects)
-  eval = case _ of
-    FetchProjects next -> next <$ do
-      projects <- liftAff do
-        log "Fetching list of projects..."
-        Gitlab.getProjects baseUrl token
-      for_ projects \project@{ id: Gitlab.ProjectId pid } -> do
-        jobs <- liftAff do
-          log $ "Fetching Jobs for Project with id: " <> show pid
-          Gitlab.getJobs baseUrl token project
-        H.modify $ upsertProjectPipelines jobs
-        liftAff $ delay (Milliseconds 1000.0)
+  eval (FetchProjects next) = next <$ do
+    projects <- liftAff getProjects
+    for_ projects \project -> do
+      jobs <- liftAff do
+        delay (Milliseconds 1000.0)
+        getJobs project
+      H.modify $ upsertProjectPipelines jobs
+
+  getProjects :: Aff Effects Gitlab.Projects
+  getProjects = do
+    log "Fetching list of projects..."
+    Gitlab.getProjects baseUrl token
+
+  getJobs :: Gitlab.Project -> Aff Effects Gitlab.Jobs
+  getJobs project@{ id: Gitlab.ProjectId pid } = do
+    log $ "Fetching Jobs for Project with id: " <> show pid
+    Gitlab.getJobs baseUrl token project  
