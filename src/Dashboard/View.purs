@@ -64,19 +64,36 @@ iconName icon =
     StopCircleO       -> "stop-circle-o"
     ArrowCircleORight -> "arrow-circle-o-right"
 
-data Icon
-  = Icon (Array ClassName) IconName
+data Modifier
+  = Stack2x
+  | Stack1x
+  | Inverse
+  | AlignMiddle
+  | Size2x
 
-icon :: Array ClassName -> IconName -> Icon
+modifierClass :: Modifier -> ClassName
+modifierClass modifier =
+  ClassName
+    case modifier of
+      Stack2x -> "fa-stack-2x"
+      Stack1x -> "fa-stack-1x"
+      Inverse -> "fa-inverse"
+      AlignMiddle -> "align-middle"
+      Size2x  -> "fa-2x"
+
+data Icon
+  = Icon (Array Modifier) IconName
+
+icon :: Array Modifier -> IconName -> Icon
 icon = Icon
 
 icon_ :: IconName -> Icon
 icon_ = Icon []
 
 fontAwesome :: ∀ p i. Icon -> HTML p i
-fontAwesome (Icon moreClasses icon) =
+fontAwesome (Icon modifiers icon) =
   H.i
-    [ P.classes (fontAwesomeClasses icon <> moreClasses)
+    [ P.classes (fontAwesomeClasses icon <> map modifierClass modifiers)
     , style do
          CSS.margin (0.0 # px) (3.0 # px) (0.0 # px) (3.0 # px)
     ]
@@ -90,12 +107,12 @@ statusIcon :: ∀ p i. JobStatus -> HTML p i
 statusIcon JobRunning =
   H.span
     [ P.classes (fontAwesomeClasses Stack) ]
-    [ fontAwesome $ icon [ ClassName "fa-stack-2x" ] CircleO
-    , fontAwesome $ icon [ ClassName "fa-stack-1x", ClassName "fa-inverse" ] Refresh
+    [ fontAwesome $ icon [ Stack2x ] CircleO
+    , fontAwesome $ icon [ Stack2x, Inverse ] Refresh
     ]
 statusIcon status =
   fontAwesome
-    $ icon (ClassName <$> [ "fa-2x", "align-middle" ])
+    $ icon [ Size2x, AlignMiddle ]
         case status of
           JobCreated  -> DotCircleO
           JobManual   -> UserCircleO
@@ -116,7 +133,6 @@ formatStatus { id: PipelineId id, status } =
     , H.br []
     , H.text $ show status
     ]
-
 
 formatCommit :: ∀ p a. CommitRow -> HTML p a
 formatCommit { authorImg
