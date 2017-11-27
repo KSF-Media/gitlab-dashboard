@@ -2,15 +2,16 @@ module Dashboard.Component where
 
 import Prelude
 
-import Control.Monad.Aff (Aff)
+import Control.Monad.Aff (Aff, delay)
 import Control.Monad.Aff.Class (liftAff)
 import Control.Monad.Aff.Console (CONSOLE, log)
 import Dashboard.Model (PipelineRow, createdDateTime, makeProjectRows)
 import Dashboard.View (formatPipeline)
 import Data.Array as Array
+import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
+import Data.Time.Duration (Milliseconds(..))
 import Gitlab as Gitlab
-import Global.Unsafe (unsafeStringify)
 import Halogen as H
 import Halogen.Aff (HalogenEffects)
 import Halogen.HTML as HH
@@ -19,9 +20,21 @@ import Network.HTTP.Affjax (AJAX)
 
 type State = Array PipelineRow
 
-data Query a
-  = UpsertProjectPipelines (Array PipelineRow) a
-  | FetchJobs Gitlab.Project a
+upsertProjectPipelines :: Gitlab.Jobs -> State -> State
+upsertProjectPipelines jobs =
+  Array.take 40
+    <<< Array.reverse
+    <<< Array.sortWith createdDateTime
+    -- Always include the pipelines passed as new data.
+    -- Filter out of the state the pipelines that we have in the new data,
+    -- and merge the remaining ones to get the new state.
+    <<< (pipelines <> _)
+    <<< Array.filter (\pr -> not $ Array.elem pr.id (map _.id pipelines))
+  where
+    pipelines = makeProjectRows jobs
+
+
+data Query a = FetchProjects a
 
 type Effects = HalogenEffects
   ( console :: CONSOLE
@@ -66,18 +79,13 @@ ui { baseUrl, token } =
 
   eval :: Query ~> H.ComponentDSL State Query Void (Aff Effects)
   eval = case _ of
-    FetchJobs project@{ id: Gitlab.ProjectId pid } next -> next <$ do
-      liftAff $ log $ "Fetching Jobs for Project with id: " <> show pid
-      jobs <- liftAff $ Gitlab.getJobs baseUrl token project
-      eval $ UpsertProjectPipelines (makeProjectRows jobs) next
-
-    UpsertProjectPipelines pipelines next -> next <$ do
-      H.modify
-        $ Array.take 40
-        <<< Array.reverse
-        <<< Array.sortWith createdDateTime
-        -- Always include the pipelines passed as new data.
-        -- Filter out of the state the pipelines that we have in the new data,
-        -- and merge the remaining ones to get the new state.
-        <<< (pipelines <> _)
-        <<< Array.filter (\pr -> not $ Array.elem pr.id (map _.id pipelines))
+    FetchProjects next -> next <$ do
+      projects <- liftAff do
+        log "Fetching list of projects..."
+        Gitlab.getProjects baseUrl token
+      for_ projects \project@{ id: Gitlab.ProjectId pid } -> do
+        jobs <- liftAff do
+          log $ "Fetching Jobs for Project with id: " <> show pid
+          Gitlab.getJobs baseUrl token project
+        H.modify $ upsertProjectPipelines jobs
+        liftAff $ delay (Milliseconds 1000.0)
