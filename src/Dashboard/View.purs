@@ -30,7 +30,7 @@ authorImage url =
     ]
 
 -- | TODO: Generate `purescript-fontawesome` library.
-data Icon
+data IconName
   = Calendar
   | CircleO
   | ClockO
@@ -46,9 +46,9 @@ data Icon
   | StopCircleO
   | ArrowCircleORight
 
-iconName :: Icon -> String
-iconName =
-  case _ of
+iconName :: IconName -> String
+iconName icon =
+  case icon of
     Calendar          -> "calendar"
     CircleO           -> "circle-o"
     ClockO            -> "clock-o"
@@ -64,8 +64,17 @@ iconName =
     StopCircleO       -> "stop-circle-o"
     ArrowCircleORight -> "arrow-circle-o-right"
 
-fontAwesome :: ∀ p i. Icon -> Array ClassName -> HTML p i
-fontAwesome icon moreClasses =
+data Icon
+  = Icon (Array ClassName) IconName
+
+icon :: Array ClassName -> IconName -> Icon
+icon = Icon
+
+icon_ :: IconName -> Icon
+icon_ = Icon []
+
+fontAwesome :: ∀ p i. Icon -> HTML p i
+fontAwesome (Icon moreClasses icon) =
   H.i
     [ P.classes (fontAwesomeClasses icon <> moreClasses)
     , style do
@@ -73,7 +82,7 @@ fontAwesome icon moreClasses =
     ]
     [ ]
 
-fontAwesomeClasses :: Icon -> Array ClassName
+fontAwesomeClasses :: IconName -> Array ClassName
 fontAwesomeClasses icon =
   ClassName <$> [ "fa", "fa-" <> iconName icon ]
 
@@ -81,21 +90,21 @@ statusIcon :: ∀ p i. JobStatus -> HTML p i
 statusIcon JobRunning =
   H.span
     [ P.classes (fontAwesomeClasses Stack) ]
-    [ fontAwesome CircleO [ ClassName "fa-stack-2x" ]
-    , fontAwesome Refresh [ ClassName "fa-stack-1x", ClassName "fa-inverse" ]
+    [ fontAwesome $ icon [ ClassName "fa-stack-2x" ] CircleO
+    , fontAwesome $ icon [ ClassName "fa-stack-1x", ClassName "fa-inverse" ] Refresh
     ]
 statusIcon status =
   fontAwesome
-    case status of
-      JobCreated  -> DotCircleO
-      JobManual   -> UserCircleO
-      JobRunning  -> Refresh
-      JobPending  -> QuestionCircleO
-      JobSuccess  -> CheckCircleO
-      JobFailed   -> TimesCircleO
-      JobCanceled -> StopCircleO
-      JobSkipped  -> ArrowCircleORight
-    (ClassName <$> [ "fa-2x", "align-middle" ])
+    $ icon (ClassName <$> [ "fa-2x", "align-middle" ])
+        case status of
+          JobCreated  -> DotCircleO
+          JobManual   -> UserCircleO
+          JobRunning  -> Refresh
+          JobPending  -> QuestionCircleO
+          JobSuccess  -> CheckCircleO
+          JobFailed   -> TimesCircleO
+          JobCanceled -> StopCircleO
+          JobSkipped  -> ArrowCircleORight
 
 formatStatus :: ∀ p a. PipelineRow -> HTML p a
 formatStatus { id: PipelineId id, status } =
@@ -119,10 +128,10 @@ formatCommit { authorImg
     [ ]
     [ authorImage authorImg
     , divider
-    , fontAwesome CodeFork []
+    , fontAwesome $ icon_ CodeFork
     , H.b_ [ H.text (" " <> branch) ]
     , divider
-    , fontAwesome Code []
+    , fontAwesome $ icon_ Code
     , H.text (" " <> hash)
     , H.br_
     , H.div
@@ -144,10 +153,10 @@ formatTimes { when, duration } =
         CSS.textAlign CSS.rightTextAlign
         CSS.paddingRight (2.0 # em)
     ]
-    [ fontAwesome ClockO []
+    [ fontAwesome $ icon_ ClockO
     , H.text (" " <> formatMillis duration)
     , H.br_
-    , fontAwesome Calendar []
+    , fontAwesome $ icon_ Calendar
     , H.text (" " <> fromNow when)
     ]
 
