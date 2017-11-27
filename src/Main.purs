@@ -24,8 +24,8 @@ pollProjects ::
   forall a eff.
   BaseUrl
   -> Token
-  -> (Dash.Query Unit -> Aff (ajax :: AJAX, console :: CONSOLE | eff) a)
-  -> Aff (ajax :: AJAX, console :: CONSOLE | eff) Unit
+  -> (Dash.Query Unit -> Aff Dash.Effects a)
+  -> Aff Dash.Effects Unit
 pollProjects baseUrl token query = forever do
   -- Get projects, poll all of them for jobs
   log "Fetching list of projects..."
@@ -44,7 +44,7 @@ pollProjects baseUrl token query = forever do
              $ Model.makeProjectRows jobs
         delay (Milliseconds 1000.0)
 
-main :: forall e. Eff (HA.HalogenEffects (ajax :: AJAX, console :: CONSOLE | e)) Unit
+main :: forall e. Eff Dash.Effects Unit
 main = do
   token   <- Token   <$> URLParams.get "private_token"
   baseUrl <- BaseUrl <$> URLParams.get "gitlab_url"
