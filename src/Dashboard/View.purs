@@ -70,6 +70,7 @@ data Modifier
   | Inverse
   | AlignMiddle
   | Size2x
+  | Spin
 
 modifierClass :: Modifier -> ClassName
 modifierClass modifier =
@@ -80,6 +81,7 @@ modifierClass modifier =
       Inverse -> "fa-inverse"
       AlignMiddle -> "align-middle"
       Size2x  -> "fa-2x"
+      Spin    -> "fa-spin"
 
 data Icon
   = Icon (Array Modifier) IconName
@@ -117,7 +119,7 @@ statusIcon status =
     case status of
       JobRunning  -> stack
          [ icon [ Stack2x ] CircleO
-         , icon [ Stack1x, Inverse ] Refresh
+         , icon [ Stack1x, Inverse, Spin ] Refresh
          ]
       JobCreated  -> icon [ Size2x, AlignMiddle ] DotCircleO
       JobManual   -> icon [ Size2x, AlignMiddle ] UserCircleO
