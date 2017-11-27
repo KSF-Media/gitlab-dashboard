@@ -83,12 +83,16 @@ modifierClass modifier =
 
 data Icon
   = Icon (Array Modifier) IconName
+  | IconStack (Array Icon)
 
 icon :: Array Modifier -> IconName -> Icon
 icon = Icon
 
 icon_ :: IconName -> Icon
 icon_ = Icon []
+
+stack :: Array Icon -> Icon
+stack = IconStack
 
 fontAwesome :: ∀ p i. Icon -> HTML p i
 fontAwesome (Icon modifiers icon) =
@@ -98,30 +102,30 @@ fontAwesome (Icon modifiers icon) =
          CSS.margin (0.0 # px) (3.0 # px) (0.0 # px) (3.0 # px)
     ]
     [ ]
+fontAwesome (IconStack icons) =
+  H.span
+    [ P.classes (fontAwesomeClasses Stack) ]
+    (fontAwesome <$> icons)
 
 fontAwesomeClasses :: IconName -> Array ClassName
 fontAwesomeClasses icon =
   ClassName <$> [ "fa", "fa-" <> iconName icon ]
 
 statusIcon :: ∀ p i. JobStatus -> HTML p i
-statusIcon JobRunning =
-  H.span
-    [ P.classes (fontAwesomeClasses Stack) ]
-    [ fontAwesome $ icon [ Stack2x ] CircleO
-    , fontAwesome $ icon [ Stack2x, Inverse ] Refresh
-    ]
 statusIcon status =
   fontAwesome
-    $ icon [ Size2x, AlignMiddle ]
-        case status of
-          JobCreated  -> DotCircleO
-          JobManual   -> UserCircleO
-          JobRunning  -> Refresh
-          JobPending  -> QuestionCircleO
-          JobSuccess  -> CheckCircleO
-          JobFailed   -> TimesCircleO
-          JobCanceled -> StopCircleO
-          JobSkipped  -> ArrowCircleORight
+    case status of
+      JobRunning  -> stack
+         [ icon [ Stack2x ] CircleO
+         , icon [ Stack1x, Inverse ] Refresh
+         ]
+      JobCreated  -> icon [ Size2x, AlignMiddle ] DotCircleO
+      JobManual   -> icon [ Size2x, AlignMiddle ] UserCircleO
+      JobPending  -> icon [ Size2x, AlignMiddle ] QuestionCircleO
+      JobSuccess  -> icon [ Size2x, AlignMiddle ] CheckCircleO
+      JobFailed   -> icon [ Size2x, AlignMiddle ] TimesCircleO
+      JobCanceled -> icon [ Size2x, AlignMiddle ] StopCircleO
+      JobSkipped  -> icon [ Size2x, AlignMiddle ] ArrowCircleORight
 
 formatStatus :: ∀ p a. PipelineRow -> HTML p a
 formatStatus { id: PipelineId id, status } =
