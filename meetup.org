@@ -1,0 +1,21 @@
+* Purescript Intro
+- what is purescript?
+	- functional, strictly typed language
+  - explicit typing of SIDE EFFECTS (hence pure)
+  - lightweight FFI
+  - compiles to javascript, thus runs everywhere
+    - has no runtime
+      -> strict evaluation
+      -> single-threaded event-loop concurrency
+    - 
+  
+- what do we know about it?
+- do we know anything?
+** Comparison
+*** Javascript
+*** Typescript
+*** Elm
+  + general purpose
+  + FFI!!!!!!!
+  + type classes
+*** Haskell

@@ -1,0 +1,18 @@
+* Fetching
+- get all projects
+- for each project:
+  - get project's jobs
+
+* Transforming
+- group jobs by pipeline
+  (these form the rows of dashboard)
+- within each pipeline
+  - group jobs by their name, e.g:
+    - build
+		- test
+    - deploy staging
+    - deploy production
+  - get status of the latest job in each group
+  - gather up other metadata
+* View
+- take all that data and turn it into HTML tree
