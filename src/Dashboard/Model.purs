@@ -4,7 +4,10 @@ import Data.Array
 import Gitlab
 import Prelude
 
+import Data.Array as Array
 import Data.DateTime (DateTime, diff)
+import Data.Foldable (maximum, maximumBy, minimum)
+import Data.Function (on)
 import Data.JSDate (JSDate, toDateTime)
 import Data.Maybe (Maybe, fromJust, fromMaybe)
 import Data.NonEmpty (NonEmpty)
@@ -33,10 +36,8 @@ type PipelineRow =
 getUniqueStages :: Array Job -> Array JobStatus
 getUniqueStages jobs = map _.status
                        $ sortWith _.id
-                       $ mapMaybe (\grp -> last
-                                           $ sortWith _.id
-                                           $ NE.fromNonEmpty (:) grp)
-                       $ groupBy (\a b -> a.name == b.name)
+                       $ mapMaybe (maximumBy (comparing _.id))
+                       $ groupBy ((==) `on` _.name)
                        $ sortWith _.name jobs
 
 makePipelineRow :: NonEmpty Array Job -> PipelineRow
@@ -56,7 +57,7 @@ makePipelineRow jobs =
   where
     job = NE.head jobs
     jobs' = NE.fromNonEmpty (:) jobs
-    defaultProject = {id: (ProjectId 0), name: (ProjectName "")}
+    defaultProject = {id: ProjectId 0, name: ProjectName ""}
     createdTime = job.created_at
 
     -- | Returns the total running time of a set of Jobs
@@ -64,20 +65,15 @@ makePipelineRow jobs =
     runningTime :: Array Job -> Maybe Milliseconds
     runningTime pipelineJobs = do
       -- Parse all into DateTime, get the earliest starting time
-      started  <- head
-                  $ sort
-                  $ mapMaybe (\j -> toDateTime =<< j.started_at) pipelineJobs
+      started  <- minimum $ mapMaybe (toDateTime <=< _.started_at) pipelineJobs
       -- Parse all into DateTime, get the latest finishing time
-      finished <- head
-                  $ reverse
-                  $ sort
-                  $ mapMaybe (\j -> toDateTime =<< j.finished_at) pipelineJobs
-      pure $ diff finished started
+      finished <- maximum $ mapMaybe (toDateTime <=< _.finished_at) pipelineJobs
+      pure $ diff started finished
 
 -- | Given all the Jobs for a Project, makes a PipelineRow out of each Pipeline
 makeProjectRows :: Jobs -> Array PipelineRow
 makeProjectRows jobs = map makePipelineRow
-                       $ groupBy (\a b -> (_.pipeline.id a) == (_.pipeline.id b))
+                       $ groupBy ((==) `on` _.pipeline.id)
                        $ sortWith _.pipeline.id jobs
 
 createdDateTime :: PipelineRow -> DateTime
