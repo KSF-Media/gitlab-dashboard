@@ -68,7 +68,7 @@ makePipelineRow jobs =
       started  <- minimum $ mapMaybe (toDateTime <=< _.started_at) pipelineJobs
       -- Parse all into DateTime, get the latest finishing time
       finished <- maximum $ mapMaybe (toDateTime <=< _.finished_at) pipelineJobs
-      pure $ diff started finished
+      pure $ diff finished started
 
 -- | Given all the Jobs for a Project, makes a PipelineRow out of each Pipeline
 makeProjectRows :: Jobs -> Array PipelineRow
