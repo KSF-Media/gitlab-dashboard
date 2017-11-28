@@ -1,23 +1,23 @@
 module Dashboard.View where
 
-import Dashboard.Model
-import Gitlab
 import Prelude
+
+import Gitlab as Gitlab
 
 import CSS (px, em)
 import CSS as CSS
 import CSS.TextAlign as CSS
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
 import Data.JSDate (JSDate)
 import Data.Newtype (unwrap)
-import Data.String as String
-import Data.Time.Duration (Milliseconds(..))
+import Data.Time.Duration (Milliseconds)
 import Halogen.HTML (HTML, ClassName(..))
 import Halogen.HTML as H
 import Halogen.HTML.CSS (style)
 import Halogen.HTML.Properties as P
 import Moment (formatMillis, fromNow)
+
+import Dashboard.Model as Model
+import Dashboard.View.Icon (Icon(..), IconName(..), Modifier(..), fontAwesome)
 
 authorImage :: ∀ p i. String -> HTML p i
 authorImage url =
@@ -29,76 +29,24 @@ authorImage url =
         CSS.borderRadius (20.0 # px) (20.0 # px) (20.0 # px) (20.0 # px)
     ]
 
--- | TODO: Generate `purescript-fontawesome` library.
-data Icon
-  = Calendar
-  | CircleO
-  | ClockO
-  | Code
-  | CodeFork
-  | Stack
-  | DotCircleO
-  | UserCircleO
-  | Refresh
-  | QuestionCircleO
-  | CheckCircleO
-  | TimesCircleO
-  | StopCircleO
-  | ArrowCircleORight
-
-iconName :: Icon -> String
-iconName =
-  case _ of
-    Calendar          -> "calendar"
-    CircleO           -> "circle-o"
-    ClockO            -> "clock-o"
-    Code              -> "code"
-    CodeFork          -> "code-fork"
-    Stack             -> "stack"
-    DotCircleO        -> "dot-circle-o"
-    UserCircleO       -> "user-circle-o"
-    Refresh           -> "refresh"
-    QuestionCircleO   -> "question-circle-o"
-    CheckCircleO      -> "check-circle-o"
-    TimesCircleO      -> "times-circle-o"
-    StopCircleO       -> "stop-circle-o"
-    ArrowCircleORight -> "arrow-circle-o-right"
-
-fontAwesome :: ∀ p i. Icon -> Array ClassName -> HTML p i
-fontAwesome icon moreClasses =
-  H.i
-    [ P.classes (fontAwesomeClasses icon <> moreClasses)
-    , style do
-         CSS.margin (0.0 # px) (3.0 # px) (0.0 # px) (3.0 # px)
-    ]
-    [ ]
-
-fontAwesomeClasses :: Icon -> Array ClassName
-fontAwesomeClasses icon =
-  ClassName <$> [ "fa", "fa-" <> iconName icon ]
-
-statusIcon :: ∀ p i. JobStatus -> HTML p i
-statusIcon JobRunning =
-  H.span
-    [ P.classes (fontAwesomeClasses Stack) ]
-    [ fontAwesome CircleO [ ClassName "fa-stack-2x" ]
-    , fontAwesome Refresh [ ClassName "fa-stack-1x", ClassName "fa-inverse" ]
-    ]
+statusIcon :: ∀ p i. Gitlab.JobStatus -> HTML p i
 statusIcon status =
   fontAwesome
     case status of
-      JobCreated  -> DotCircleO
-      JobManual   -> UserCircleO
-      JobRunning  -> Refresh
-      JobPending  -> QuestionCircleO
-      JobSuccess  -> CheckCircleO
-      JobFailed   -> TimesCircleO
-      JobCanceled -> StopCircleO
-      JobSkipped  -> ArrowCircleORight
-    (ClassName <$> [ "fa-2x", "align-middle" ])
+      Gitlab.JobRunning  -> IconStack
+         [ Icon [ Stack2x ] CircleO
+         , Icon [ Stack1x, Inverse, Spin ] Refresh
+         ]
+      Gitlab.JobCreated  -> Icon [ Size2x, AlignMiddle ] DotCircleO
+      Gitlab.JobManual   -> Icon [ Size2x, AlignMiddle ] UserCircleO
+      Gitlab.JobPending  -> Icon [ Size2x, AlignMiddle ] QuestionCircleO
+      Gitlab.JobSuccess  -> Icon [ Size2x, AlignMiddle ] CheckCircleO
+      Gitlab.JobFailed   -> Icon [ Size2x, AlignMiddle ] TimesCircleO
+      Gitlab.JobCanceled -> Icon [ Size2x, AlignMiddle ] StopCircleO
+      Gitlab.JobSkipped  -> Icon [ Size2x, AlignMiddle ] ArrowCircleORight  
 
-formatStatus :: ∀ p a. PipelineRow -> HTML p a
-formatStatus { id: PipelineId id, status } =
+formatStatus :: ∀ p a. Model.PipelineRow -> HTML p a
+formatStatus { id: Gitlab.PipelineId id, status } =
   H.div
     [ style do
         CSS.paddingLeft (2.0 # em)
@@ -108,21 +56,21 @@ formatStatus { id: PipelineId id, status } =
     , H.text $ show status
     ]
 
-
-formatCommit :: ∀ p a. CommitRow -> HTML p a
+formatCommit :: ∀ p a. Model.CommitRow -> HTML p a
 formatCommit { authorImg
              , commitTitle
-             , hash: CommitShortHash hash
-             , branch: BranchName branch
-             } =
+             , hash: Gitlab.CommitShortHash hash
+             , branch: Gitlab.BranchName branch
+             }
+             =
   H.div
     [ ]
     [ authorImage authorImg
     , divider
-    , fontAwesome CodeFork []
+    , fontAwesome $ Icon [] CodeFork
     , H.b_ [ H.text (" " <> branch) ]
     , divider
-    , fontAwesome Code []
+    , fontAwesome $ Icon [] Code
     , H.text (" " <> hash)
     , H.br_
     , H.div
@@ -144,24 +92,14 @@ formatTimes { when, duration } =
         CSS.textAlign CSS.rightTextAlign
         CSS.paddingRight (2.0 # em)
     ]
-    [ fontAwesome ClockO []
+    [ fontAwesome $ Icon [] ClockO
     , H.text (" " <> formatMillis duration)
     , H.br_
-    , fontAwesome Calendar []
+    , fontAwesome $ Icon [] Calendar
     , H.text (" " <> fromNow when)
     ]
 
-rowColor :: PipelineStatus -> ClassName
-rowColor =
-  case _ of
-    Running  -> ClassName "bg-primary"
-    Pending  -> ClassName "bg-info"
-    Success  -> ClassName "bg-success"
-    Failed   -> ClassName "bg-danger"
-    Canceled -> ClassName "bg-warning"
-    Skipped  -> ClassName "bg-none"
-
-formatPipeline :: ∀ p i. PipelineRow -> HTML p i
+formatPipeline :: ∀ p i. Model.PipelineRow -> HTML p i
 formatPipeline pipeline =
     row (cell <$> cells)
   where
@@ -185,3 +123,15 @@ formatPipeline pipeline =
    row =
      H.tr
        [ P.classes [ rowColor pipeline.status ] ]
+
+   rowColor :: Gitlab.PipelineStatus -> ClassName
+   rowColor status =
+      case status of
+        Gitlab.Running  -> ClassName "bg-primary"
+        Gitlab.Pending  -> ClassName "bg-info"
+        Gitlab.Success  -> ClassName "bg-success"
+        Gitlab.Failed   -> ClassName "bg-danger"
+        Gitlab.Canceled -> ClassName "bg-warning"
+        Gitlab.Skipped  -> ClassName "bg-none"
+
+
