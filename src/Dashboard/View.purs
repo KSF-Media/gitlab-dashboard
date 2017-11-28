@@ -2,7 +2,7 @@ module Dashboard.View where
 
 import Prelude
 
-import Gitlab
+import Gitlab as Gitlab
 
 import CSS (px, em)
 import CSS as CSS
@@ -16,7 +16,7 @@ import Halogen.HTML.CSS (style)
 import Halogen.HTML.Properties as P
 import Moment (formatMillis, fromNow)
 
-import Dashboard.Model (CommitRow, PipelineRow)
+import Dashboard.Model as Model
 import Dashboard.View.Icon (Icon(..), IconName(..), Modifier(..), fontAwesome)
 
 authorImage :: ∀ p i. String -> HTML p i
@@ -29,24 +29,24 @@ authorImage url =
         CSS.borderRadius (20.0 # px) (20.0 # px) (20.0 # px) (20.0 # px)
     ]
 
-statusIcon :: ∀ p i. JobStatus -> HTML p i
+statusIcon :: ∀ p i. Gitlab.JobStatus -> HTML p i
 statusIcon status =
   fontAwesome
     case status of
-      JobRunning  -> IconStack
+      Gitlab.JobRunning  -> IconStack
          [ Icon [ Stack2x ] CircleO
          , Icon [ Stack1x, Inverse, Spin ] Refresh
          ]
-      JobCreated  -> Icon [ Size2x, AlignMiddle ] DotCircleO
-      JobManual   -> Icon [ Size2x, AlignMiddle ] UserCircleO
-      JobPending  -> Icon [ Size2x, AlignMiddle ] QuestionCircleO
-      JobSuccess  -> Icon [ Size2x, AlignMiddle ] CheckCircleO
-      JobFailed   -> Icon [ Size2x, AlignMiddle ] TimesCircleO
-      JobCanceled -> Icon [ Size2x, AlignMiddle ] StopCircleO
-      JobSkipped  -> Icon [ Size2x, AlignMiddle ] ArrowCircleORight  
+      Gitlab.JobCreated  -> Icon [ Size2x, AlignMiddle ] DotCircleO
+      Gitlab.JobManual   -> Icon [ Size2x, AlignMiddle ] UserCircleO
+      Gitlab.JobPending  -> Icon [ Size2x, AlignMiddle ] QuestionCircleO
+      Gitlab.JobSuccess  -> Icon [ Size2x, AlignMiddle ] CheckCircleO
+      Gitlab.JobFailed   -> Icon [ Size2x, AlignMiddle ] TimesCircleO
+      Gitlab.JobCanceled -> Icon [ Size2x, AlignMiddle ] StopCircleO
+      Gitlab.JobSkipped  -> Icon [ Size2x, AlignMiddle ] ArrowCircleORight  
 
-formatStatus :: ∀ p a. PipelineRow -> HTML p a
-formatStatus { id: PipelineId id, status } =
+formatStatus :: ∀ p a. Model.PipelineRow -> HTML p a
+formatStatus { id: Gitlab.PipelineId id, status } =
   H.div
     [ style do
         CSS.paddingLeft (2.0 # em)
@@ -56,12 +56,13 @@ formatStatus { id: PipelineId id, status } =
     , H.text $ show status
     ]
 
-formatCommit :: ∀ p a. CommitRow -> HTML p a
+formatCommit :: ∀ p a. Model.CommitRow -> HTML p a
 formatCommit { authorImg
              , commitTitle
-             , hash: CommitShortHash hash
-             , branch: BranchName branch
-             } =
+             , hash: Gitlab.CommitShortHash hash
+             , branch: Gitlab.BranchName branch
+             }
+             =
   H.div
     [ ]
     [ authorImage authorImg
@@ -98,17 +99,7 @@ formatTimes { when, duration } =
     , H.text (" " <> fromNow when)
     ]
 
-rowColor :: PipelineStatus -> ClassName
-rowColor =
-  case _ of
-    Running  -> ClassName "bg-primary"
-    Pending  -> ClassName "bg-info"
-    Success  -> ClassName "bg-success"
-    Failed   -> ClassName "bg-danger"
-    Canceled -> ClassName "bg-warning"
-    Skipped  -> ClassName "bg-none"
-
-formatPipeline :: ∀ p i. PipelineRow -> HTML p i
+formatPipeline :: ∀ p i. Model.PipelineRow -> HTML p i
 formatPipeline pipeline =
     row (cell <$> cells)
   where
@@ -132,3 +123,15 @@ formatPipeline pipeline =
    row =
      H.tr
        [ P.classes [ rowColor pipeline.status ] ]
+
+   rowColor :: Gitlab.PipelineStatus -> ClassName
+   rowColor status =
+      case status of
+        Gitlab.Running  -> ClassName "bg-primary"
+        Gitlab.Pending  -> ClassName "bg-info"
+        Gitlab.Success  -> ClassName "bg-success"
+        Gitlab.Failed   -> ClassName "bg-danger"
+        Gitlab.Canceled -> ClassName "bg-warning"
+        Gitlab.Skipped  -> ClassName "bg-none"
+
+

@@ -57,25 +57,16 @@ modifierClass :: Modifier -> ClassName
 modifierClass modifier =
   ClassName
     case modifier of
-      Stack2x -> "fa-stack-2x"
-      Stack1x -> "fa-stack-1x"
-      Inverse -> "fa-inverse"
+      Stack2x     -> "fa-stack-2x"
+      Stack1x     -> "fa-stack-1x"
+      Inverse     -> "fa-inverse"
       AlignMiddle -> "align-middle"
-      Size2x  -> "fa-2x"
-      Spin    -> "fa-spin"
+      Size2x      -> "fa-2x"
+      Spin        -> "fa-spin"
 
 data Icon
   = Icon (Array Modifier) IconName
   | IconStack (Array Icon)
-
-icon :: Array Modifier -> IconName -> Icon
-icon = Icon
-
-icon_ :: IconName -> Icon
-icon_ = Icon []
-
-stack :: Array Icon -> Icon
-stack = IconStack
 
 fontAwesome :: ∀ p a. Icon -> HTML p a
 fontAwesome (Icon modifiers icon) =
