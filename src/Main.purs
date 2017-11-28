@@ -2,59 +2,35 @@ module Main where
 
 import Prelude
 
-import Dashboard.Component as Dash
-import Control.Monad.Aff (Aff, Milliseconds(..), delay)
-import Control.Monad.Aff.Console (CONSOLE, log)
+import Control.Monad.Aff (Aff, Milliseconds(..), catchError, delay)
+import Control.Monad.Aff.Console (log)
 import Control.Monad.Eff (Eff)
-import Dashboard.Model as Model
-import Data.Array (uncons)
-import Data.Maybe (Maybe(..))
-import Gitlab (BaseUrl(..), Token(..), getJobs, getProjects)
-import Global.Unsafe (unsafeStringify)
+import Control.Monad.Eff.Exception as Error
+import Control.Monad.Rec.Class (forever)
+import Dashboard.Component as Dash
+import Gitlab as Gitlab
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
-import Network.HTTP.Affjax (AJAX)
 import URLSearchParams as URLParams
 
+-- | Takes the component IO handle and repeatedly tells it to fetch the projects.
+pollProjects
+  :: forall o. H.HalogenIO Dash.Query o (Aff Dash.Effects)
+  -> Aff Dash.Effects Unit
+pollProjects io = forever do
+  io.query (H.action $ Dash.FetchProjects)
+    `catchError` \error -> do
+      log $ "Polling failed with error: " <> Error.message error
+      delay (Milliseconds 5000.0)
 
-pollProjects ::
-  forall a eff.
-  BaseUrl
-  -> Token
-  -> (Dash.Query Unit -> Aff (ajax :: AJAX, console :: CONSOLE | eff) a)
-  -> Aff (ajax :: AJAX, console :: CONSOLE | eff) Unit
-pollProjects baseUrl token query = do
-  -- Get projects, poll all of them for jobs
-  log "Fetching list of projects..."
-  projects <- getProjects baseUrl token
-  fetchJobs projects
-
-  -- Wait 30 secs and recur
-  delay (Milliseconds 30000.0)
-  void $ pollProjects baseUrl token query
-  where
-    -- If list of projects is empty, return
-    -- If not, take the first, get jobs, and upsert in the Component
-    -- Then wait 1s, and recur to fetch the rest
-    fetchJobs projects = case uncons projects of
-      Nothing -> pure unit
-      Just { head: p, tail: ps } -> do
-        log $ "Fetching Jobs for Project with id: " <> unsafeStringify p.id
-        jobs <- getJobs baseUrl token p
-        _ <- query
-             $ H.action
-             $ Dash.UpsertProjectPipelines
-             $ Model.makeProjectRows jobs
-        delay (Milliseconds 1000.0)
-        fetchJobs ps
-
-main :: forall e. Eff (HA.HalogenEffects (ajax :: AJAX, console :: CONSOLE | e)) Unit
+main :: Eff Dash.Effects Unit
 main = do
-  token   <- Token   <$> URLParams.get "private_token"
-  baseUrl <- BaseUrl <$> URLParams.get "gitlab_url"
+  token   <- Gitlab.Token   <$> URLParams.get "private_token"
+  baseUrl <- Gitlab.BaseUrl <$> URLParams.get "gitlab_url"
+  let config = { baseUrl, token }
   -- TODO: display error if parameters are not provided
   HA.runHalogenAff $ do
     body <- HA.awaitBody
-    io <- runUI Dash.ui unit body
-    pollProjects baseUrl token io.query
+    io <- runUI (Dash.ui config) unit body
+    pollProjects io
