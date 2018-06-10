@@ -33,6 +33,12 @@ Example: `https://ksf-media.github.io/gitlab-dashboard/index.html?private_token=
 
 ## Developing
 
+NOTE: gitlab-dashboard will not work with the 0.12.x version of the purescript compiler. To install the latest working compiler:
+
+```bash
+npm install -g purescript@0.11.7
+```
+
 Install dependencies with:
 
 ```bash
