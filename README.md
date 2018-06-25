@@ -41,3 +41,4 @@ Quickstart:
 - Install [yarn](https://yarnpkg.com/lang/en/docs/install/)
 - `yarn install -E`
 - `yarn start` to serve a hot-reload server on http://localhost:1337/
+- optional: you might want to have `pulp, purs, psc-package` available globally: `yarn global add purescript pulp psc-package`
