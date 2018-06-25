@@ -1,6 +1,5 @@
 module URLSearchParams where
 
-import Control.Monad.Eff (Eff)
-import DOM (DOM)
+import Effect (Effect)
 
-foreign import get :: forall e. String -> Eff (dom :: DOM | e) String
+foreign import get :: forall e. String -> Effect String
