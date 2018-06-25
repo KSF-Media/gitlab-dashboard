@@ -3,3 +3,4 @@ output
 .psc-package
 app.js
 .psci_modules
+yarn-error.log
