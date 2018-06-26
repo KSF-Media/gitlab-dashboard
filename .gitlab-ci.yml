@@ -21,8 +21,8 @@ build:
 # We push the new version to the gh-pages branch
 publish:
   stage: publish
-  #only:
-  #- master
+  only:
+  - master
   script:
   # Build
   ## TODO: parametrize the js filename with the commit hash
