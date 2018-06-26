@@ -1,23 +1,22 @@
 module Dashboard.Model where
 
-import Data.Array
-import Gitlab
 import Prelude
 
-import Data.Array as Array
+import Gitlab as Gitlab
+import Data.Array (groupBy, mapMaybe, sortWith)
 import Data.DateTime (DateTime, diff)
 import Data.Foldable (maximum, maximumBy, minimum)
 import Data.Function (on)
 import Data.JSDate (JSDate, toDateTime)
 import Data.Maybe (Maybe, fromJust, fromMaybe)
-import Data.NonEmpty (NonEmpty)
-import Data.NonEmpty as NE
+import Data.Array.NonEmpty (NonEmptyArray)
+import Data.Array.NonEmpty as NE
 import Data.Time.Duration (Milliseconds(..))
 import Partial.Unsafe (unsafePartial)
 
 type CommitRow =
-  { branch      :: BranchName
-  , hash        :: CommitShortHash
+  { branch      :: Gitlab.BranchName
+  , hash        :: Gitlab.CommitShortHash
   , authorImg   :: String
   , commitTitle :: String
   }
@@ -25,22 +24,22 @@ type CommitRow =
 type PipelineRow =
   { commit      :: CommitRow
   , created     :: JSDate
-  , status      :: PipelineStatus
-  , id          :: PipelineId
-  , project     :: Project
-  , stages      :: Array JobStatus
+  , status      :: Gitlab.PipelineStatus
+  , id          :: Gitlab.PipelineId
+  , project     :: Gitlab.Project
+  , stages      :: Array Gitlab.JobStatus
   , duration    :: Milliseconds
   }
 
 
-getUniqueStages :: Array Job -> Array JobStatus
+getUniqueStages :: Array Gitlab.Job -> Array Gitlab.JobStatus
 getUniqueStages jobs = map _.status
                        $ sortWith _.id
                        $ mapMaybe (maximumBy (comparing _.id))
                        $ groupBy ((==) `on` _.name)
                        $ sortWith _.name jobs
 
-makePipelineRow :: NonEmpty Array Job -> PipelineRow
+makePipelineRow :: NonEmptyArray Gitlab.Job -> PipelineRow
 makePipelineRow jobs =
   { status: job.pipeline.status
   , id: job.pipeline.id
@@ -56,13 +55,13 @@ makePipelineRow jobs =
   }
   where
     job = NE.head jobs
-    jobs' = NE.fromNonEmpty (:) jobs
-    defaultProject = {id: ProjectId 0, name: ProjectName ""}
+    jobs' = NE.toArray jobs
+    defaultProject = {id: Gitlab.ProjectId 0, name: Gitlab.ProjectName ""}
     createdTime = job.created_at
 
     -- | Returns the total running time of a set of Jobs
     --   (which should belong to the same Pipeline)
-    runningTime :: Array Job -> Maybe Milliseconds
+    runningTime :: Array Gitlab.Job -> Maybe Milliseconds
     runningTime pipelineJobs = do
       -- Parse all into DateTime, get the earliest starting time
       started  <- minimum $ mapMaybe (toDateTime <=< _.started_at) pipelineJobs
@@ -71,7 +70,7 @@ makePipelineRow jobs =
       pure $ diff started finished
 
 -- | Given all the Jobs for a Project, makes a PipelineRow out of each Pipeline
-makeProjectRows :: Jobs -> Array PipelineRow
+makeProjectRows :: Gitlab.Jobs -> Array PipelineRow
 makeProjectRows jobs = map makePipelineRow
                        $ groupBy ((==) `on` _.pipeline.id)
                        $ sortWith _.pipeline.id jobs

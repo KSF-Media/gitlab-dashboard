@@ -1,10 +1,10 @@
 {
     "name": "gitlab-dashboard",
-    "set": "aff-4.0-27-Oct-2017",
-    "source": "https://github.com/justinwoo/package-sets.git",
+    "set": "psc-0.12.0-20180625",
+    "source": "https://github.com/purescript/package-sets.git",
     "depends": [
-        "uri",
         "datetime",
+        "arrays",
         "js-date",
         "transformers",
         "debug",
@@ -12,7 +12,6 @@
         "simple-json",
         "affjax",
         "strings",
-        "dom",
         "argonaut-core",
         "aff",
         "halogen",
@@ -21,7 +20,9 @@
         "prelude",
         "psci-support",
         "console",
-        "eff",
+        "exceptions",
+        "effect",
+        "foreign-generic",
         "generics-rep"
     ]
 }

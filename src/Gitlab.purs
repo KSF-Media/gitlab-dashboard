@@ -2,20 +2,21 @@ module Gitlab where
 
 import Prelude
 
-import Control.Monad.Aff (Aff, error, throwError)
-import Control.Monad.Eff.Unsafe (unsafePerformEff)
+import Data.Argonaut.Core as JSON
+import Effect.Aff (Aff, error, throwError)
+import Effect.Unsafe (unsafePerformEffect)
 import Data.Either (Either(..))
-import Data.Foreign.Generic.EnumEncoding (genericDecodeEnum, genericEncodeEnum)
+import Foreign.Generic.EnumEncoding (genericDecodeEnum, genericEncodeEnum)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.JSDate (JSDate, parse)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.String (toLower, drop)
-import Network.HTTP.Affjax (AJAX, get)
+import Network.HTTP.Affjax (get)
+import Network.HTTP.Affjax.Response (json)
 import Network.HTTP.StatusCode (StatusCode(..))
-import Simple.JSON (class ReadForeign, class WriteForeign, readJSON, writeJSON)
-import Type.Prelude (SProxy(..))
+import Simple.JSON (class ReadForeign, class WriteForeign, readJSON)
 
 newtype BaseUrl = BaseUrl String
 newtype Token = Token String
@@ -134,23 +135,21 @@ type Projects = Array Project
 type Jobs = Array Job
 
 
-getProjects :: forall a. BaseUrl -> Token -> Aff (ajax :: AJAX | a) Projects
+getProjects :: BaseUrl -> Token -> Aff Projects
 getProjects (BaseUrl baseUrl) (Token token) = do
   let url = baseUrl
             <> "/api/v4/projects?private_token="
             <> token
             <> "&simple=true&per_page=20&order_by=last_activity_at"
-  projectsRes <- get url
+  projectsRes <- get json url
   when (projectsRes.status /= (StatusCode 200)) do
     throwError $ error "Failed to fetch projects"
-  case readJSON projectsRes.response of
+  case readJSON $ JSON.stringify projectsRes.response of
     Left e -> do
       throwError $ error ("Failed to parse projects: " <> show e)
     Right projects -> pure projects
 
-getJobs :: forall a.
-           BaseUrl -> Token -> Project
-           -> Aff (ajax :: AJAX | a) Jobs
+getJobs :: BaseUrl -> Token -> Project -> Aff Jobs
 getJobs (BaseUrl baseUrl) (Token token) project = do
   let url = baseUrl
             <> "/api/v4/projects/"
@@ -158,10 +157,10 @@ getJobs (BaseUrl baseUrl) (Token token) project = do
             <> "/jobs?private_token="
             <> token
             <> "&per_page=100"
-  jobsRes <- get url
+  jobsRes <- get json url
   when (jobsRes.status /= (StatusCode 200)) do
     throwError $ error "Failed to fetch jobs"
-  case readJSON jobsRes.response of
+  case readJSON $ JSON.stringify jobsRes.response of
     Left e -> do
       throwError $ error ("Failed to parse jobs: " <> show e)
     Right jobs -> pure $ map (setProject project) $ map castDates jobs
@@ -171,7 +170,7 @@ getJobs (BaseUrl baseUrl) (Token token) project = do
 
       -- I know, but it's just for accessing locale
       readJSDate :: String -> JSDate
-      readJSDate date = unsafePerformEff $ parse date
+      readJSDate date = unsafePerformEffect $ parse date
 
       castDates job = job
         { created_at = readJSDate job.created_at

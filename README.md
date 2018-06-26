@@ -12,14 +12,16 @@ But the feature is tagged as a "moonshot", so not sure we'll get it baked in Git
 
 ## Solution
 
-We quickly hacked together our own:
+We made a simple dashboard that lists all CI builds, together with their status, completion time, etc:
 
 ![Screenshot](/screenshot.png)
 
-This version has only a list (polling the APIs and updating every 30 seconds) of Pipelines across the Gitlab instance,
-but we are planning to implement the mockup view as well.
+We currently list _all_ the Pipelines on _all_ branches (polling the APIs and updating every 30s),
+but we'd like to implement also a simpler view that tracks the status of the `master` branch.  
+This effort is tracked [here](https://github.com/KSF-Media/gitlab-dashboard/issues/13).
 
-PRs-welcome!
+We very much welcome PRs, if you'd like to contribute take a look at the [issue list](https://github.com/KSF-Media/gitlab-dashboard/issues)
+for Issues tagged with "Good first issue"!
 
 ## Demo
 
@@ -29,22 +31,14 @@ You need to give to the page some parameters:
 - `private_token`: your Gitlab auth token
 - `gitlab_url`: the URL to your Gitlab instance
 
-Example: `https://ksf-media.github.io/gitlab-dashboard/index.html?private_token=YOUR-TOKEN-HERE&gitlab_url=https://YOUR-GITLAB-URL`
+Example: `https://ksf-media.github.io/gitlab-dashboard/index.html?private_token=YOUR-TOKEN-HERE&gitlab_url=https://YOUR-GITLAB-URL**
 
 ## Developing
 
-NOTE: gitlab-dashboard will not work with the 0.12.x version of the purescript compiler. To install the latest working compiler:
+**NOTE***: `gitlab-dashboard` works only with Purescript >= `0.12.x`. To run with a previous version, use [this commit](https://github.com/KSF-Media/gitlab-dashboard/tree/dfec798e1e3a91bde961e53a77f4d523ea460639).
 
-```bash
-npm install -g purescript@0.11.7
-```
-
-Install dependencies with:
-
-```bash
-npm install -g pulp psc-package
-npm install
-```
-
-
-Run `npm start` to serve a hot-reload server on http://localhost:1337/
+Quickstart:
+- Install [yarn](https://yarnpkg.com/lang/en/docs/install/)
+- `yarn install -E`
+- `yarn start` to serve a hot-reload server on http://localhost:1337/
+- optional: you might want to have `pulp, purs, psc-package` available globally: `yarn global add purescript pulp psc-package`

@@ -2,10 +2,10 @@ module Main where
 
 import Prelude
 
-import Control.Monad.Aff (Aff, Milliseconds(..), catchError, delay)
-import Control.Monad.Aff.Console (log)
-import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Exception as Error
+import Effect.Aff (Aff, Milliseconds(..), catchError, delay)
+import Effect.Class.Console (log)
+import Effect (Effect)
+import Effect.Exception as Error
 import Control.Monad.Rec.Class (forever)
 import Dashboard.Component as Dash
 import Gitlab as Gitlab
@@ -16,15 +16,15 @@ import URLSearchParams as URLParams
 
 -- | Takes the component IO handle and repeatedly tells it to fetch the projects.
 pollProjects
-  :: forall o. H.HalogenIO Dash.Query o (Aff Dash.Effects)
-  -> Aff Dash.Effects Unit
+  :: forall o. H.HalogenIO Dash.Query o Aff
+  -> Aff Unit
 pollProjects io = forever do
   io.query (H.action $ Dash.FetchProjects)
     `catchError` \error -> do
       log $ "Polling failed with error: " <> Error.message error
       delay (Milliseconds 5000.0)
 
-main :: Eff Dash.Effects Unit
+main :: Effect Unit
 main = do
   token   <- Gitlab.Token   <$> URLParams.get "private_token"
   baseUrl <- Gitlab.BaseUrl <$> URLParams.get "gitlab_url"
