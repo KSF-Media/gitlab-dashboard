@@ -1,0 +1,34 @@
+image: node:10
+
+cache:
+  key: "gitlab-dashboard-yarn"
+  paths:
+    - .yarn-cache
+
+stages:
+- build
+- publish
+
+# "Build"
+# The goal here is to just check for compile errors
+build:
+  stage: build
+  artifacts:
+    paths:
+    - output/
+  script:
+  - yarn install --pure-lockfile --cache-folder .yarn-cache
+
+# "Publish"
+# We push the new version to the gh-pages branch
+publish:
+  stage: publish
+  only:
+  - master
+  script:
+  - mv output/app.js app.js
+  - echo "" > .nojekyll  # Hack so we can include node_modules
+  - git checkout -b gh-pages
+  - git add -f node_modules app.js .nojekyll
+  - git commit -m "Generate gh-pages"
+  - git push -f --set-upstream origin gh-pages
