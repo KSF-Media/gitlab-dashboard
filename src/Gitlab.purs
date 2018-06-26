@@ -2,7 +2,7 @@ module Gitlab where
 
 import Prelude
 
-import Data.Argonaut.Core as J
+import Data.Argonaut.Core as JSON
 import Effect.Aff (Aff, error, throwError)
 import Effect.Unsafe (unsafePerformEffect)
 import Data.Either (Either(..))
@@ -144,7 +144,7 @@ getProjects (BaseUrl baseUrl) (Token token) = do
   projectsRes <- get json url
   when (projectsRes.status /= (StatusCode 200)) do
     throwError $ error "Failed to fetch projects"
-  case readJSON $ J.stringify projectsRes.response of
+  case readJSON $ JSON.stringify projectsRes.response of
     Left e -> do
       throwError $ error ("Failed to parse projects: " <> show e)
     Right projects -> pure projects
@@ -160,7 +160,7 @@ getJobs (BaseUrl baseUrl) (Token token) project = do
   jobsRes <- get json url
   when (jobsRes.status /= (StatusCode 200)) do
     throwError $ error "Failed to fetch jobs"
-  case readJSON $ J.stringify jobsRes.response of
+  case readJSON $ JSON.stringify jobsRes.response of
     Left e -> do
       throwError $ error ("Failed to parse jobs: " <> show e)
     Right jobs -> pure $ map (setProject project) $ map castDates jobs
