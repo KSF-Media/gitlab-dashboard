@@ -3,7 +3,8 @@ image: node:10
 cache:
   key: "gitlab-dashboard-yarn"
   paths:
-    - .yarn-cache
+  - node_modules
+  - .yarn-cache
 
 stages:
 - build
@@ -35,7 +36,7 @@ publish:
   - chmod 600 ~/.ssh/id_rsa
   - eval "$(ssh-agent -s)"
   - ssh-add ~/.ssh/id_rsa
-  - ssh-keyscan -H 'git.ksfmedia.fi' >> ~/.ssh/known_hosts
+  - ssh-keyscan -H 'github.com' >> ~/.ssh/known_hosts
   - git config --global user.email "gitlab-ci@ksfmedia.fi"
   - git config --global user.name "Gitlab CI"
 
