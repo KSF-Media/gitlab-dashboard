@@ -13,9 +13,6 @@ stages:
 # The goal here is to just check for compile errors
 build:
   stage: build
-  artifacts:
-    paths:
-    - output/
   script:
   - yarn install --pure-lockfile --cache-folder .yarn-cache
 
@@ -23,12 +20,29 @@ build:
 # We push the new version to the gh-pages branch
 publish:
   stage: publish
-  only:
-  - master
+  #only:
+  #- master
   script:
+  # Build
+  ## TODO: parametrize the js filename with the commit hash
+  - yarn install --pure-lockfile --cache-folder .yarn-cache
   - mv output/app.js app.js
   - echo "" > .nojekyll  # Hack so we can include node_modules
+
+  # Configure git and ssh
+  - mkdir -p ~/.ssh
+  ## Paste the PRIVATE key into a gitlab variable. Pay attention to the linebreak at the end when pasting
+  - echo "$GITHUB_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  - eval "$(ssh-agent -s)"
+  - ssh-add ~/.ssh/id_rsa
+  - ssh-keyscan -H 'git.ksfmedia.fi' >> ~/.ssh/known_hosts
+  - git config --global user.email "gitlab-ci@ksfmedia.fi"
+  - git config --global user.name "Gitlab CI"
+
+  # Deploy
   - git checkout -b gh-pages
   - git add -f node_modules app.js .nojekyll
   - git commit -m "Generate gh-pages"
+  - git remote set-url origin git@github.com:KSF-Media/gitlab-dashboard.git
   - git push -f --set-upstream origin gh-pages
