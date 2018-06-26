@@ -26,7 +26,6 @@ publish:
   # Build
   ## TODO: parametrize the js filename with the commit hash
   - yarn install --pure-lockfile --cache-folder .yarn-cache
-  - mv output/app.js app.js
   - echo "" > .nojekyll  # Hack so we can include node_modules
 
   # Configure git and ssh
