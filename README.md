@@ -31,11 +31,11 @@ You need to give to the page some parameters:
 - `private_token`: your Gitlab auth token
 - `gitlab_url`: the URL to your Gitlab instance
 
-Example: `https://ksf-media.github.io/gitlab-dashboard/index.html?private_token=YOUR-TOKEN-HERE&gitlab_url=https://YOUR-GITLAB-URL**
+Example: `https://ksf-media.github.io/gitlab-dashboard/index.html?private_token=YOUR-TOKEN-HERE&gitlab_url=https://YOUR-GITLAB-URL`
 
 ## Developing
 
-**NOTE***: `gitlab-dashboard` works only with Purescript >= `0.12.x`. To run with a previous version, use [this commit](https://github.com/KSF-Media/gitlab-dashboard/tree/dfec798e1e3a91bde961e53a77f4d523ea460639).
+**NOTE**: `gitlab-dashboard` works only with Purescript >= `0.12.x`. To run with a previous version, use [this commit](https://github.com/KSF-Media/gitlab-dashboard/tree/dfec798e1e3a91bde961e53a77f4d523ea460639).
 
 Quickstart:
 - Install [yarn](https://yarnpkg.com/lang/en/docs/install/)
