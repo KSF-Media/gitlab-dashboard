@@ -42,3 +42,10 @@ Quickstart:
 - `yarn install -E`
 - `yarn start` to serve a hot-reload server on http://localhost:1337/
 - optional: you might want to have `pulp, purs, psc-package` available globally: `yarn global add purescript pulp psc-package`
+
+## Docker
+
+Build image
+    docker build -t gitlab-dashboard:latest .
+Run the server
+    docker run -t -p 80:80 --rm gitlab-dashboard
