@@ -28,6 +28,7 @@ data PipelineStatus
   | Failed
   | Canceled
   | Skipped
+  | Manual
 
 derive instance eqPipelineStatus :: Eq PipelineStatus
 derive instance genericPipelineStatus :: Generic PipelineStatus _

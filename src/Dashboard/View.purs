@@ -133,5 +133,5 @@ formatPipeline pipeline =
         Gitlab.Failed   -> ClassName "bg-danger"
         Gitlab.Canceled -> ClassName "bg-warning"
         Gitlab.Skipped  -> ClassName "bg-none"
-
+        Gitlab.Manual   -> ClassName "bg-info"
 
