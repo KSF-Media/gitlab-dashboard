@@ -72,6 +72,13 @@ derive newtype instance ordProjectName :: Ord ProjectName
 derive newtype instance readforeignProjectName :: ReadForeign ProjectName
 derive newtype instance writeforeignProjectName :: WriteForeign ProjectName
 
+newtype ProjectNameWithNamespace = ProjectNameWithNamespace String
+derive instance newtypeProjectNameWithNamespace :: Newtype ProjectNameWithNamespace _
+derive newtype instance eqProjectNameWithNamespace :: Eq ProjectNameWithNamespace
+derive newtype instance ordProjectNameWithNamespace :: Ord ProjectNameWithNamespace
+derive newtype instance readforeignProjectNameWithNamespace :: ReadForeign ProjectNameWithNamespace
+derive newtype instance writeforeignProjectNameWithNamespace :: WriteForeign ProjectNameWithNamespace
+
 newtype CommitShortHash = CommitShortHash String
 derive newtype instance readforeignCommitShortHash :: ReadForeign CommitShortHash
 derive newtype instance writeforeignCommitShortHash :: WriteForeign CommitShortHash
@@ -102,6 +109,7 @@ derive newtype instance writeforeignBranchName :: WriteForeign BranchName
 type Project =
   { id   :: ProjectId
   , name :: ProjectName
+  , name_with_namespace :: ProjectNameWithNamespace
   }
 
 type User =

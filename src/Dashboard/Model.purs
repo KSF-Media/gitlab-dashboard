@@ -21,6 +21,12 @@ type CommitRow =
   , commitTitle :: String
   }
 
+type NameRow =
+  { id                    :: Gitlab.ProjectId
+  , name                  :: Gitlab.ProjectName
+  , name_with_namespace   :: Gitlab.ProjectNameWithNamespace
+  }
+
 type PipelineRow =
   { commit      :: CommitRow
   , created     :: JSDate
@@ -56,7 +62,10 @@ makePipelineRow jobs =
   where
     job = NE.head jobs
     jobs' = NE.toArray jobs
-    defaultProject = {id: Gitlab.ProjectId 0, name: Gitlab.ProjectName ""}
+    defaultProject = { id: Gitlab.ProjectId 0
+                     , name: Gitlab.ProjectName ""
+                     , name_with_namespace: Gitlab.ProjectNameWithNamespace ""
+                     }
     createdTime = job.created_at
 
     -- | Returns the total running time of a set of Jobs
