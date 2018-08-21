@@ -21,6 +21,12 @@ type CommitRow =
   , commitTitle :: String
   }
 
+type NameRow =
+  { id          :: Gitlab.ProjectId
+  , name        :: Gitlab.ProjectName
+  , name_with_namespace   :: Gitlab.ProjectNameWithNamespace
+  }
+
 type PipelineRow =
   { commit      :: CommitRow
   , created     :: JSDate
