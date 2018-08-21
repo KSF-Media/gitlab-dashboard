@@ -2,22 +2,23 @@ module Dashboard.View where
 
 import Prelude
 
-import Gitlab as Gitlab
-
 import CSS (px, em)
 import CSS as CSS
 import CSS.TextAlign as CSS
+import Dashboard.Model as Model
+import Dashboard.View.Icon (Icon(..), IconName(..), Modifier(..), fontAwesome)
+import Data.Array (head)
 import Data.JSDate (JSDate)
+import Data.Maybe (fromMaybe)
 import Data.Newtype (unwrap)
+import Data.String (Pattern(..), split)
 import Data.Time.Duration (Milliseconds)
+import Gitlab as Gitlab
 import Halogen.HTML (HTML, ClassName(..))
 import Halogen.HTML as H
 import Halogen.HTML.CSS (style)
 import Halogen.HTML.Properties as P
 import Moment (formatMillis, fromNow)
-
-import Dashboard.Model as Model
-import Dashboard.View.Icon (Icon(..), IconName(..), Modifier(..), fontAwesome)
 
 authorImage :: ∀ p i. String -> HTML p i
 authorImage url =
@@ -43,7 +44,7 @@ statusIcon status =
       Gitlab.JobSuccess  -> Icon [ Size2x, AlignMiddle ] CheckCircleO
       Gitlab.JobFailed   -> Icon [ Size2x, AlignMiddle ] TimesCircleO
       Gitlab.JobCanceled -> Icon [ Size2x, AlignMiddle ] StopCircleO
-      Gitlab.JobSkipped  -> Icon [ Size2x, AlignMiddle ] ArrowCircleORight  
+      Gitlab.JobSkipped  -> Icon [ Size2x, AlignMiddle ] ArrowCircleORight
 
 formatStatus :: ∀ p a. Model.PipelineRow -> HTML p a
 formatStatus { id: Gitlab.PipelineId id, status } =
@@ -55,6 +56,18 @@ formatStatus { id: Gitlab.PipelineId id, status } =
     , H.br []
     , H.text $ show status
     ]
+
+formatName :: ∀ p a. Model.NameRow -> HTML p a
+formatName  { id
+            , name: Gitlab.ProjectName name
+            , name_with_namespace: Gitlab.ProjectNameWithNamespace namespace
+            }
+            =
+  H.div []
+        [ H.text $ fromMaybe "" (head $ split (Pattern "/") namespace)
+        , H.br_
+        , H.b_ [ H.text name ]
+        ]
 
 formatCommit :: ∀ p a. Model.CommitRow -> HTML p a
 formatCommit { authorImg
@@ -105,7 +118,7 @@ formatPipeline pipeline =
   where
    cells =
      [ [ formatStatus pipeline ]
-     , [ H.b_ [ H.text $ unwrap pipeline.project.name ] ]
+     , [ formatName pipeline.project ]
      , [ formatCommit pipeline.commit ]
      , statusIcon <$> pipeline.stages
      , [ formatTimes { when: pipeline.created, duration: pipeline.duration } ]
