@@ -1,0 +1,41 @@
+{
+  "name": "mold-source-map",
+  "version": "0.4.0",
+  "description": "Mold a source map that is almost perfect for you into one that is.",
+  "main": "mold-source-map.js",
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thlorenz/mold-source-map.git"
+  },
+  "homepage": "https://github.com/thlorenz/mold-source-map",
+  "dependencies": {
+    "convert-source-map": "^1.1.0",
+    "through": "~2.2.7"
+  },
+  "devDependencies": {
+    "tap": "~0.4.0",
+    "browserify": "^10.2.0"
+  },
+  "keywords": [
+    "mold",
+    "change",
+    "modify",
+    "adapt",
+    "sourcemap",
+    "source",
+    "map",
+    "browserify"
+  ],
+  "author": {
+    "name": "Thorsten Lorenz",
+    "email": "thlorenz@gmx.de",
+    "url": "http://thlorenz.com"
+  },
+  "license": "MIT",
+  "engine": {
+    "node": ">=0.6"
+  }
+}

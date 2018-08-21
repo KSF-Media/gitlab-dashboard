@@ -1,0 +1,38 @@
+{
+  "name": "size-rate",
+  "version": "0.1.0",
+  "description": "Format current and maximum bytes into a human-readable expression",
+  "repository": "shinnn/size-rate",
+  "author": "Shinnosuke Watanabe (https://github.com/shinnn)",
+  "scripts": {
+    "pretest": "eslint --fix --format=codeframe benchmark.js index.js test.js",
+    "test": "nyc --reporter=html --reporter=text node test.js"
+  },
+  "license": "CC0-1.0",
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "size",
+    "rate",
+    "max",
+    "byte",
+    "bytes",
+    "kilobyte",
+    "kibibyte",
+    "format"
+  ],
+  "dependencies": {
+    "filesize": "^3.5.10",
+    "inspect-with-kind": "^1.0.2"
+  },
+  "devDependencies": {
+    "@shinnn/eslint-config-node": "^4.0.2",
+    "eslint": "^4.2.0",
+    "nyc": "^11.0.3",
+    "tape": "^4.7.0"
+  },
+  "eslintConfig": {
+    "extends": "@shinnn/node"
+  }
+}
