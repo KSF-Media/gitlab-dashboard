@@ -64,7 +64,7 @@ formatName  { id
             }
             =
   H.div []
-        [ H.text $ fromMaybe "" (head $ split (Pattern "/") namespace)
+        [ H.text $ fromMaybe "" $ head $ split (Pattern "/") namespace
         , H.br_
         , H.b_ [ H.text name ]
         ]

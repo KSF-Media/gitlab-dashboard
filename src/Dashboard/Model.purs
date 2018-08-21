@@ -22,8 +22,8 @@ type CommitRow =
   }
 
 type NameRow =
-  { id          :: Gitlab.ProjectId
-  , name        :: Gitlab.ProjectName
+  { id                    :: Gitlab.ProjectId
+  , name                  :: Gitlab.ProjectName
   , name_with_namespace   :: Gitlab.ProjectNameWithNamespace
   }
 
@@ -62,7 +62,7 @@ makePipelineRow jobs =
   where
     job = NE.head jobs
     jobs' = NE.toArray jobs
-    defaultProject = {id: Gitlab.ProjectId 0
+    defaultProject = { id: Gitlab.ProjectId 0
                      , name: Gitlab.ProjectName ""
                      , name_with_namespace: Gitlab.ProjectNameWithNamespace ""
                      }
