@@ -114,6 +114,8 @@ type Project =
 
 type User =
   { avatar_url :: String
+  , name :: String
+  , username :: String
   }
 
 type Commit =

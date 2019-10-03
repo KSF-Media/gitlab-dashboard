@@ -18,6 +18,8 @@ type CommitRow =
   { branch      :: Gitlab.BranchName
   , hash        :: Gitlab.CommitShortHash
   , authorImg   :: String
+  , name        :: String
+  , username    :: String
   , commitTitle :: String
   }
 
@@ -57,6 +59,8 @@ makePipelineRow jobs =
             , hash: job.commit.short_id
             , commitTitle: job.commit.title
             , authorImg: job.user.avatar_url
+            , name: job.user.name
+            , username: job.user.username
             }
   }
   where
