@@ -3,6 +3,6 @@
 exports.get = function(paramName) {
   return function() {
     var url = new URL(window.location.toString());
-    return url.searchParams.get(paramName);
+    return url.searchParams.get(paramName) || "null";
   };
 };

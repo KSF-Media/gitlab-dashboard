@@ -71,8 +71,6 @@ formatName  { id
 
 formatCommit :: ∀ p a. Model.CommitRow -> HTML p a
 formatCommit { authorImg
-             , name
-             , username
              , commitTitle
              , hash: Gitlab.CommitShortHash hash
              , branch: Gitlab.BranchName branch
@@ -81,7 +79,6 @@ formatCommit { authorImg
   H.div
     [ ]
     [ authorImage authorImg
-    , H.text (" " <> name <> " (" <> username <> ")")
     , divider
     , fontAwesome $ Icon [] CodeFork
     , H.b_ [ H.text (" " <> branch) ]
