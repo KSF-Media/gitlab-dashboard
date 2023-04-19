@@ -1,6 +1,4 @@
-node_modules
 output
-index.js
 .psci_modules
 yarn-error.log
 .spago
