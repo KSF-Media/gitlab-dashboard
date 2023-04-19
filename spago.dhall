@@ -8,12 +8,9 @@
   , "console"
   , "css"
   , "datetime"
-  , "debug"
   , "effect"
   , "either"
-  , "exceptions"
   , "foldable-traversable"
-  , "foreign"
   , "foreign-generic"
   , "halogen"
   , "halogen-css"
@@ -22,11 +19,9 @@
   , "newtype"
   , "partial"
   , "prelude"
-  , "psci-support"
   , "simple-json"
   , "strings"
   , "tailrec"
-  , "transformers"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

@@ -1,6 +1,6 @@
 {
   "name": "gitlab-dashboard",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "TV dashboard for a global view on Gitlab Pipelines",
   "main": "index.js",
   "scripts": {
