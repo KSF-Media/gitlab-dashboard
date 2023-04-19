@@ -1,1 +1,1 @@
-module.exports = require('path').join(__dirname, 'purs.bin');
+module.exports = require.resolve('./purs.bin');
