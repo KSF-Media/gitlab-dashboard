@@ -42,7 +42,7 @@ Quickstart:
 - `yarn build`
 - Open `file://path/to/gitlab-dashboard/index.html?private_token=<gitlabtoken>&gitlab_url=https://gitlab.domain.tld` in a browser
 
-## Docker (deprecated)
+## Docker
 
 Build image
     docker build -t gitlab-dashboard:latest .
