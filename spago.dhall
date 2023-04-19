@@ -1,0 +1,33 @@
+{ name = "gitlab-dashboard"
+, dependencies =
+  [ "aff"
+  , "affjax"
+  , "affjax-web"
+  , "argonaut-core"
+  , "arrays"
+  , "console"
+  , "css"
+  , "datetime"
+  , "debug"
+  , "effect"
+  , "either"
+  , "exceptions"
+  , "foldable-traversable"
+  , "foreign"
+  , "foreign-generic"
+  , "halogen"
+  , "halogen-css"
+  , "js-date"
+  , "maybe"
+  , "newtype"
+  , "partial"
+  , "prelude"
+  , "psci-support"
+  , "simple-json"
+  , "strings"
+  , "tailrec"
+  , "transformers"
+  ]
+, packages = ./packages.dhall
+, sources = [ "src/**/*.purs", "test/**/*.purs" ]
+}

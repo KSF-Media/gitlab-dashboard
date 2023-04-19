@@ -1,6 +1,8 @@
 node_modules
 output
-.psc-package
-app.js
+index.js
 .psci_modules
 yarn-error.log
+.spago
+.psc-ide-port
+package-lock.json

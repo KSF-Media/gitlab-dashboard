@@ -58,8 +58,7 @@ formatStatus { id: Gitlab.PipelineId id, status } =
     ]
 
 formatName :: ∀ p a. Model.NameRow -> HTML p a
-formatName  { id
-            , name: Gitlab.ProjectName name
+formatName  { name: Gitlab.ProjectName name
             , name_with_namespace: Gitlab.ProjectNameWithNamespace namespace
             }
             =

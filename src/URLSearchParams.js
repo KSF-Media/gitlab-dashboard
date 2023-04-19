@@ -1,6 +1,4 @@
-"use strict";
-
-exports.get = function(paramName) {
+export function get(paramName) {
   return function() {
     var url = new URL(window.location.toString());
     return url.searchParams.get(paramName);
