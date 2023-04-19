@@ -1,14 +1,13 @@
 module Gitlab where
 
-import Data.Generic.Rep
 import Prelude
 
 import Affjax (get)
 import Affjax.ResponseFormat (json)
-import Affjax.StatusCode (StatusCode(..))
 import Affjax.Web (driver)
 import Data.Argonaut.Core as JSON
 import Data.Either (Either(..))
+import Data.Generic.Rep (class Generic)
 import Data.JSDate (JSDate, parse)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)

@@ -3,14 +3,13 @@ module Dashboard.View where
 import Prelude
 
 import CSS (px, em)
-import CSS as CSS
-import CSS.TextAlign as CSS
+import CSS.TextAlign (leftTextAlign, rightTextAlign, textAlign) as CSS
+import CSS (borderRadius, marginLeft, paddingLeft, paddingRight, textWhitespace, whitespaceNoWrap) as CSS
 import Dashboard.Model as Model
 import Dashboard.View.Icon (Icon(..), IconName(..), Modifier(..), fontAwesome)
 import Data.Array (head)
 import Data.JSDate (JSDate)
 import Data.Maybe (fromMaybe)
-import Data.Newtype (unwrap)
 import Data.String (Pattern(..), split)
 import Data.Time.Duration (Milliseconds)
 import Gitlab as Gitlab
