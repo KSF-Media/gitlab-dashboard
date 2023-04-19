@@ -35,15 +35,14 @@ Example: `https://ksf-media.github.io/gitlab-dashboard/index.html?private_token=
 
 ## Developing
 
-**NOTE**: `gitlab-dashboard` works only with Purescript >= `0.12.x`. To run with a previous version, use [this commit](https://github.com/KSF-Media/gitlab-dashboard/tree/dfec798e1e3a91bde961e53a77f4d523ea460639).
-
 Quickstart:
 - Install [yarn](https://yarnpkg.com/lang/en/docs/install/)
+- Install [spago](https://github.com/purescript/spago.git)
 - `yarn install -E`
-- `yarn start` to serve a hot-reload server on http://localhost:1337/
-- optional: you might want to have `pulp, purs, psc-package` available globally: `yarn global add purescript pulp psc-package`
+- `yarn build`
+- Open `file://path/to/gitlab-dashboard/index.html?private_token=<gitlabtoken>&gitlab_url=https://gitlab.domain.tld` in a browser
 
-## Docker
+## Docker (deprecated)
 
 Build image
     docker build -t gitlab-dashboard:latest .

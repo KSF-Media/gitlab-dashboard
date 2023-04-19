@@ -51,7 +51,7 @@ makePipelineRow :: NonEmptyArray Gitlab.Job -> PipelineRow
 makePipelineRow jobs =
   { status: job.pipeline.status
   , id: job.pipeline.id
-  , project: fromMaybe defaultProject job.project
+  , project: fromMaybe defaultProject job.project_
   , stages: getUniqueStages jobs'
   , created: createdTime
   , duration: fromMaybe (Milliseconds 0.0) $ runningTime jobs'

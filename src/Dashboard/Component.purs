@@ -2,15 +2,15 @@ module Dashboard.Component where
 
 import Prelude
 
-import Effect.Aff (Aff, delay)
-import Effect.Aff.Class (liftAff)
-import Effect.Class.Console (log)
 import Dashboard.Model (PipelineRow, createdDateTime, makeProjectRows)
 import Dashboard.View (formatPipeline)
 import Data.Array as Array
 import Data.Foldable (for_)
 import Data.Maybe (Maybe(..))
 import Data.Time.Duration (Milliseconds(..))
+import Effect.Aff (Aff, delay)
+import Effect.Aff.Class (liftAff, class MonadAff)
+import Effect.Class.Console (log)
 import Gitlab as Gitlab
 import Halogen as H
 import Halogen.HTML as HH
@@ -25,20 +25,20 @@ type Config =
   , token   :: Gitlab.Token
   }
 
-ui :: Config -> H.Component HH.HTML Query Unit Void Aff
+ui :: forall input output m. MonadAff m => Config -> H.Component Query input output m
 ui { baseUrl, token } =
-  H.component
+  H.mkComponent
     { initialState: const initialState
     , render
-    , eval
-    , receiver: const Nothing
+    , eval: H.mkEval H.defaultEval {handleQuery = handleQuery}
+    --, receive: const Nothing
     }
   where
 
   initialState :: State
   initialState = []
 
-  render :: State -> H.ComponentHTML Query
+  render :: forall action. State -> H.ComponentHTML action () m
   render pipelines =
     HH.table
       [ HP.classes [ H.ClassName "table"
@@ -56,8 +56,9 @@ ui { baseUrl, token } =
       , HH.tbody_ $ map formatPipeline pipelines
       ]
 
-  eval :: Query ~> H.ComponentDSL State Query Void Aff
-  eval (FetchProjects next) = next <$ do
+  --eval :: forall a m. Query a -> H.HalogenM State Query Unit Void Aff
+  handleQuery :: forall a action s o m0. MonadAff m0 => Query a -> H.HalogenM State action s o m0 (Maybe a)
+  handleQuery (FetchProjects next) = Just next <$ do
     projects <- liftAff getProjects
     for_ projects \project -> do
       jobs <- liftAff do

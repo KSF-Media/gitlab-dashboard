@@ -1,21 +1,23 @@
 module Gitlab where
 
+import Data.Generic.Rep
 import Prelude
 
+import Affjax (get)
+import Affjax.ResponseFormat (json)
+import Affjax.StatusCode (StatusCode(..))
+import Affjax.Web (driver)
 import Data.Argonaut.Core as JSON
-import Effect.Aff (Aff, error, throwError)
-import Effect.Unsafe (unsafePerformEffect)
 import Data.Either (Either(..))
-import Foreign.Generic.EnumEncoding (genericDecodeEnum, genericEncodeEnum)
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
 import Data.JSDate (JSDate, parse)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
+import Data.Show.Generic (genericShow)
 import Data.String (toLower, drop)
-import Network.HTTP.Affjax (get)
-import Network.HTTP.Affjax.Response (json)
-import Network.HTTP.StatusCode (StatusCode(..))
+import Effect.Aff (Aff, error, throwError)
+import Effect.Class.Console (log)
+import Effect.Unsafe (unsafePerformEffect)
+import Foreign.Generic.EnumEncoding (genericDecodeEnum, genericEncodeEnum)
 import Simple.JSON (class ReadForeign, class WriteForeign, readJSON)
 
 newtype BaseUrl = BaseUrl String
@@ -100,6 +102,7 @@ derive newtype instance eqJobName :: Eq JobName
 derive newtype instance ordJobName :: Ord JobName
 derive newtype instance readforeignJobName :: ReadForeign JobName
 derive newtype instance writeforeignJobName :: WriteForeign JobName
+derive newtype instance showJobName :: Show JobName
 
 newtype BranchName = BranchName String
 derive newtype instance readforeignBranchName :: ReadForeign BranchName
@@ -129,7 +132,7 @@ type Pipeline =
   }
 
 type Job =
-  { project     :: Maybe Project
+  { project_     :: Maybe Project
   , user        :: User
   , commit      :: Commit
   , ref         :: BranchName
@@ -152,13 +155,15 @@ getProjects (BaseUrl baseUrl) (Token token) = do
             <> "/api/v4/projects?private_token="
             <> token
             <> "&simple=true&per_page=20&order_by=last_activity_at"
-  projectsRes <- get json url
-  when (projectsRes.status /= (StatusCode 200)) do
-    throwError $ error "Failed to fetch projects"
-  case readJSON $ JSON.stringify projectsRes.response of
-    Left e -> do
-      throwError $ error ("Failed to parse projects: " <> show e)
-    Right projects -> pure projects
+  projectsRes <- get driver json url
+  x <- case projectsRes of
+    Right x -> case readJSON $ JSON.stringify x.body of
+      Left err -> do
+        throwError $ error ("Failed to parse projects: " <> show err)
+      Right projects -> pure projects
+    Left _ -> do
+      throwError $ error ("Failed to fetch projects") 
+  pure x
 
 getJobs :: BaseUrl -> Token -> Project -> Aff Jobs
 getJobs (BaseUrl baseUrl) (Token token) project = do
@@ -168,16 +173,22 @@ getJobs (BaseUrl baseUrl) (Token token) project = do
             <> "/jobs?private_token="
             <> token
             <> "&per_page=100"
-  jobsRes <- get json url
-  when (jobsRes.status /= (StatusCode 200)) do
-    throwError $ error "Failed to fetch jobs"
-  case readJSON $ JSON.stringify jobsRes.response of
-    Left e -> do
-      throwError $ error ("Failed to parse jobs: " <> show e)
-    Right jobs -> pure $ map (setProject project) $ map castDates jobs
+  jobsRes <- get driver json url
+  x <- case jobsRes of
+    Right res -> case readJSON $ JSON.stringify res.body of
+      Left err -> do
+        log $ "readJSON failed with: " <> show err
+        throwError $ error ("Failed to parse jobs: " <> show err)
+      Right jobs -> do
+        pure $ map (setProject project) $ map castDates jobs
+    Left _ -> do  
+      throwError $ error "Failed to fetch jobs"
+  pure x
+    
     where
+
       setProject :: Project -> Job -> Job
-      setProject p j = j {project = Just p}
+      setProject p j = j {project_ = Just p}
 
       -- I know, but it's just for accessing locale
       readJSDate :: String -> JSDate
